@@ -1,0 +1,19 @@
+Zapisnica zo stretnutia zo zadavatelom
+
+Pritomni: vsetci
+
+1. Rozbehat Rails app
+  - dostaneme schemu, migracie
+  - zoznamit sa s Rails, JS grafickymi prostrediami, Android + ohekovat WebView
+
+2. Vygenerovat stromy userov
+  - aj kosate plytke, aj uzke hlboke
+
+3. Vizualizacia stromov userov
+  - Vizuly weighted tree
+    - nakonfigurovat
+  - Gource
+
+4. Implementacia vizualizacie do
+  - Androidu - WebView
+  - Browser - JS
