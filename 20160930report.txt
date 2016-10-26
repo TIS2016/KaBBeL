@@ -1,0 +1,15 @@
+Zapisnica zo stretnutia s cviciacim
+
+Pritomni: Lattak, Bilisics, Bohumel
+
+Vykonane:
+- vytvoreny repozitar: github.com/TIS2016/VernostneProgramy
+- vytvorena vetva 'doc'
+- zoznamenie s cviciacim
+
+Dohodnute:
+- dohoda terminu stretnuti s cviciacim - streda 10:40-11:25
+- stretnutia bez cviciaceho - streda 9:50-11:35
+- treba pockat na spatny email od zadavatela
+- format dokumentacie bude .TeX
+
