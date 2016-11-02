@@ -1,0 +1,12 @@
+02.11.2016
+Pritomni: Bilisics, Bohumel, Lattak
+
+Vykonane:
+  - podrobna technicka analyza kodu templatu
+  - dokonceny seq, ER, UC, stavovy diagram
+  - potencialny problem s Vizuly, treba overit, vyriesit
+
+Dohodnute:
+  - Kellner spravi data flow diagram do piatka
+  - hladat dalsie riesenia zobrazenia stromu
+  - s class diagramom treba chvilu pockat, kym sa vyriesi problem s Vizuly
