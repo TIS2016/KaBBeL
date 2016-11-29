@@ -1,0 +1,11 @@
+Zapisnica z oboch stretnuti
+Pritomni: vsetci okrem Kellnera
+
+Vykonane:
+  - Nasli sme alternativny tree-tool: Treant.js
+  - Dohodli sme sa na jeho pouzivani
+
+Dohodnute:
+  - Treba hlbkovu analyzu kodu, ako jednoducho ho vieme upravit aby nam vyhovoval
+  - Kazdy si povinne precita dokumentaciu k nemu
+  - Stretnutie so zadavatelom naplanovane
