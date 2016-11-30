@@ -1,0 +1,8 @@
+Pritomni: vsetci okrem Lattaka
+
+Vykonane:
+  - Dokonceny podrobny technicky navrh
+  - Dnes vecer sa objavi na Githube
+
+Dohodnute:
+  - Rozdelena praca na implementaciu, soft-deadline o tyzden
