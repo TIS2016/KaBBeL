@@ -1589,6 +1589,20 @@
 				}
 			);
 		},
+		
+		addHoverEvents: function( nodeEl ) {
+			var self = this;
+			UTIL.addEvent( nodeEl, 'mouseenter',
+				function( e ) {
+					Console.log('mouseenter event fired');
+				}
+			);
+			UTIL.addEvent( nodeEl, 'mouseleave',
+				function( e ) {
+					Console.log('mouseleave event fired');
+				}
+			);
+		},
 
 		/**
 		 * @returns {TreeNode}
@@ -1883,6 +1897,8 @@
 			if ( this.collapsed || (this.collapsable && this.childrenCount() && !this.stackParentId) ) {
 				this.createSwitchGeometry( tree, node );
 			}
+			
+			this.addHoverEvents( node );
 		}
 
 		tree.CONFIG.callback.onCreateNode.apply( tree, [this, node] );
