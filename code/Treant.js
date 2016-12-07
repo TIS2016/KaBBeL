@@ -68,7 +68,7 @@
         return this.extraInfo[id] = info;
     }
 
-    Davkovac.prototype.addSon = function (myID, fatherID, zarobok, meno,datumUz,prog,datumKon) {
+    Davkovac.prototype.addSon = function (myID, fatherID, zarobok, meno, datumUz, prog, datumKon) {
         if (myID != this.mainPart) {
             part = {
                 datumUzavretia:datumUz,
