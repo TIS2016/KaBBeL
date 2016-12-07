@@ -15,6 +15,228 @@
  */
 
 ;(function(){
+    
+    var Davkovac = function(id) {
+        this.extraInfo = [];
+        this.parts = [];
+        this.mainPart = id;
+        this.showing = [];
+        this.numberOfSons = [];
+        this.clicked = id;
+        this.usedID = [];
+        this.displayNumber = 10;
+        this.config = {
+            container: "#collapsable-example",
+            animateOnInit: true,
+
+            node: {
+                collapsable: true
+            },
+            animation: {
+                nodeAnimation: "easeOutBounce",
+                nodeSpeed: 700,
+                connectorsAnimation: "bounce",
+                connectorsSpeed: 700
+            }
+        }
+        this.addSon(id, id, 0, "Ja",null,null,null);
+
+    }
+    
+    Davkovac.prototype.changeConfig = function () {
+        this.config = {
+            container: "#collapsable-example",
+            animateOnInit: false,
+
+            node: {
+                collapsable: true
+            },
+            animation: {
+                nodeAnimation: "easeOutBounce",
+                nodeSpeed: 700,
+                connectorsAnimation: "bounce",
+                connectorsSpeed: 700
+            }
+        }
+    }
+
+    Davkovac.prototype.getInfo = function (id) {
+        return this.extraInfo[id];
+    }
+    
+    Davkovac.prototype.addInfo = function (id, info) {
+        return this.extraInfo[id] = info;
+    }
+
+    Davkovac.prototype.addSon = function (myID, fatherID, zarobok, meno,datumUz,prog,datumKon) {
+        if (myID != this.mainPart) {
+            part = {
+                datumUzavretia:datumUz,
+                program: prog,
+                datumKoncaZmluvy: datumKon,
+                id:myID,
+                parent: fatherID,
+                text: {
+                    name: zarobok,
+                    title: meno,
+                }                    
+            }
+        }
+        else {
+            part = {
+                id:myID,
+                text: {
+                    collapsed: true,
+                    title: meno,
+                }
+            }
+        }
+        this.parts[myID] = part;
+        this.showing[myID] = 0;
+    }
+
+    Davkovac.prototype.updateNumber = function () {
+        var iterator = this.parts.keys()
+        var iter = iterator.next()
+        while (!iter.done) {
+            var part = this.getSon(iter.value);
+            if (part != undefined) {
+                this.numberOfSons[iter.value] = this.numberOfHisSons(part);
+            }
+            iter = iterator.next();
+        }
+        return this;
+    }
+    
+    Davkovac.prototype.numberOfHisSons = function (compare) {
+        var pocet = 0;
+        var iterator = this.parts.keys()
+        var iter = iterator.next()
+        while (!iter.done) {
+            var part = this.getSon(iter.value);
+            if (part != undefined) {
+                if (part.parent == compare) {
+                    pocet++;
+                }
+            }
+            iter = iterator.next();
+        }
+
+        return pocet;
+    }
+    
+    Davkovac.prototype.getSon = function (id) {
+        return this.parts[id];
+    }
+    
+    Davkovac.prototype.nextSons = function (fatherID) {
+        var father = this.getSon(fatherID);
+        if (this.numberOfSons[fatherID] - (this.showing[fatherID] + 1) * this.displayNumber > 0) {
+            this.showing[fatherID] = this.showing[fatherID] + 1;
+        }
+        else {
+            this.showing[fatherID] = 0;
+        }
+    }
+
+    Davkovac.prototype.getParents = function () {
+        var result = [];
+        var iterator = this.parts.keys();
+        var iter = iterator.next();
+        while (!iter.done) {
+            var part = this.getSon(iter.value);
+            if (part != undefined && part != this.getSon(this.mainPart)) {
+                if (result[this.parts.indexOf(part.parent)] == undefined) {
+                    result[this.parts.indexOf(part.parent)] = [];
+                }
+                result[this.parts.indexOf(part.parent)].push(part);
+            }
+            iter = iterator.next();
+        }
+        return this.stripSons(result);
+        //return result;
+    }
+
+    Davkovac.prototype.stripSons = function (fatherField) {
+        var result = [];
+        var iterator = fatherField.keys();
+        var iter = iterator.next();
+        var selected = 0;
+        while (!iter.done) {
+            var part = fatherField[iter.value];
+            if (part != undefined) {
+                this.parts[iter.value].collapsed = true;
+            
+                result[iter.value] = [];
+                selected = 0;
+                var next = fatherField[iter.value][selected + this.showing[iter.value] * this.displayNumber];
+                while (!(selected == this.displayNumber || next == undefined)) {
+                    result[iter.value][selected] = next;
+                    selected++;
+                    next = fatherField[iter.value][selected + this.showing[iter.value] * this.displayNumber];
+                }
+            }
+            iter = iterator.next();
+        }
+        return this.stripFathers(result);
+    }
+
+    Davkovac.prototype.uncollapse = function (resArray) {
+        if (this.clicked == this.mainPart) {
+            return resArray;
+        }
+        nextParent=this.parts[this.clicked];
+        while (nextParent != this.parts[this.mainPart]) {
+            resArray[resArray.indexOf(nextParent)].collapsed = false;
+            nextParent = nextParent.parent;
+        }
+        return resArray;
+    }
+    
+    Davkovac.prototype.stripFathers = function (fatherField) {
+        var self = this;
+        var stripFathers1 = function (fatherField, part) {
+            var result = [];
+            fatherField[part].forEach(function(item) {
+                result.push(item);
+                var newPart = self.parts.indexOf(item);
+                if (fatherField[newPart] != undefined) {
+                    result = result.concat(stripFathers1(fatherField, newPart));
+                }
+            });
+            return result;
+        }
+        return stripFathers1(fatherField, this.mainPart);
+    }
+    
+    Davkovac.prototype.createTree = function () {
+        
+        var result = [];
+        result.push(this.config);
+        result.push(this.parts[this.mainPart]);
+        result = result.concat(this.uncollapse(this.getParents()));
+        this.createUsedID(result);
+        return result;
+    }
+
+    Davkovac.prototype.createUsedID=function(pole){
+        this.usedID = [];
+        for (i = 1; i < pole.length; i++) {
+            this.usedID[i-1]=pole[i].id;
+        }
+    }
+
+    Davkovac.prototype.updateParents = function () {
+        var self = this;
+        this.parts.forEach(function (part) {
+            if (part.parent != undefined) {
+                part.parent = self.parts[part.parent];
+            }
+        })
+        return this;
+    }
+    
+    var davkovac = null;
 
 	var $ = null;
 
@@ -1594,12 +1816,14 @@
 			var self = this;
 			UTIL.addEvent( nodeEl, 'mouseenter',
 				function( e ) {
-					Console.log('mouseenter event fired');
+                    var davkovacID = davkovac.usedID[self.id];
+					console.log('mouseenter ' + davkovacID);
 				}
 			);
 			UTIL.addEvent( nodeEl, 'mouseleave',
 				function( e ) {
-					Console.log('mouseleave event fired');
+                    var davkovacID = davkovac.usedID[self.id];
+					console.log('mouseleave ' + davkovacID);
 				}
 			);
 		},
@@ -2098,10 +2322,20 @@
 	/**
 	 * Chart constructor.
 	 */
-	var Treant = function(jsonConfig, callback, jQuery) {
-		if ( jsonConfig instanceof Array ) {
-			jsonConfig = JSONconfig.make( jsonConfig );
-		}
+	var Treant = function(config, callback, jQuery) {
+        
+        davkovac = new Davkovac(config[0][0]);
+        config.shift();
+        config.forEach(function(item) {
+            davkovac.addSon(item[0], item[1], item[2], item[3], item[4], item[5], item[6]);
+        });
+        davkovac.updateParents().updateNumber();
+        davkovac.clicked = 7;
+        
+        window.arr = davkovac.createTree();
+        console.log(window.arr);
+        
+        var jsonConfig = JSONconfig.make( window.arr );
 
 		// optional
 		if ( jQuery ) {

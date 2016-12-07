@@ -184,7 +184,6 @@
                         result[iter.value][selected] = next;
                         selected++;
                         next = fatherField[iter.value][selected + this.showing[iter.value] * this.displayNumber];
-                        //console.log(selected);
                     }
                 }
                 iter = iterator.next();
@@ -237,7 +236,6 @@
         davkovac.prototype.createUsedID=function(pole){
             this.usedID = [];
             for (i = 1; i < pole.length; i++) {
-                //console.log(pole[i]);
                 this.usedID[i-1]=pole[i].id;
             }
         }

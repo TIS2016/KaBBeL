@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+    <title> Collapsable example </title>
+    <link rel="stylesheet" href="Treant.css">
+    <link rel="stylesheet" href="collapsable.css">
+    <link rel="stylesheet" href="vendor/perfect-scrollbar/perfect-scrollbar.css">
+</head>
+<body>
+    <div class="chart" id="collapsable-example"></div>
+    <script src="vendor/raphael.js"></script>
+    <script src="Treant.js"></script>
+
+    <script src="vendor/jquery.min.js"></script>
+    <script src="vendor/jquery.easing.js"></script>
+
+    <script>
+        var config = [
+            [10, 10, 12,   "Ja",  null, null, null],
+            [ 1, 10, 12, "nom1",  null, null, null],
+            [ 2, 10, 12, "nom2",  null, null, null],
+            [ 8,  5, 12, "XXXX1", null, null, null],
+            [ 9,  5, 12, "XXXX2", null, null, null],
+            [ 4, 10, 12, "nom3",  null, null, null],
+            [41, 10, 12, "nom4",  null, null, null],
+            [42, 10, 12, "nom5",  null, null, null],
+            [43, 10, 12, "nom6",  null, null, null],
+            [44, 10, 12, "nom7",  null, null, null],
+            [45, 10, 12, "nom8",  null, null, null],
+            [46, 10, 12, "nom9",  null, null, null],
+            [47, 10, 12, "nom10", null, null, null],
+            [48, 10, 12, "nom11", null, null, null],
+            [49, 10, 12, "nom12", null, null, null],
+            [50, 10, 12, "nom13", null, null, null],
+            [ 3,  2, 12, "XXX1",  null, null, null],
+            [ 5,  2, 12, "XXX2",  null, null, null],
+            [ 6,  2, 12, "XXX3",  null, null, null],
+            [ 7,  6, 12, "XXX3",  null, null, null],
+        ]
+        var t = new Treant(config, function() {}, $);
+    </script>
+</body>
+</html>
