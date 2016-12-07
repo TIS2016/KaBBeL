@@ -1835,20 +1835,23 @@
             var x = event.pageX + 'px';
             var y = event.pageY + 'px';
             var div = $('<div>').css({
-                "position": "absolute",                    
-                "left": x,
-                "top": y,
+                'position': 'absolute',                    
+                'left': x,
+                'top': y,
                 
-                "background-color": "white",
-                "padding": "5px",
+                'background-color': 'white',
+                'padding': '5px',
                 
-                "border-style": "solid",
-                "border-color": "black",
-                "border-width": "1px",
-                "border-radius": "5px",
+                'border-style': 'solid',
+                'border-color': 'black',
+                'border-width': '1px',
+                'border-radius': '5px',
             });
             
             var ul = div.append('<ul></ul>').find('ul');
+            ul.css({
+                'list-style-type': 'none'
+            });
             ul.append('<li>Program: ' + son.program + '</li>');
             ul.append('<li>Dátum uzavretia zmluvy: ' + son.datumUzavretia + '</li>');
             ul.append('<li>Dátum vypršania zmluvy: ' + son.datumKoncaZmluvy + '</li>');
