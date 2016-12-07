@@ -1817,16 +1817,45 @@
 			UTIL.addEvent( nodeEl, 'mouseenter',
 				function( e ) {
                     var davkovacID = davkovac.usedID[self.id];
-					console.log('mouseenter ' + davkovacID);
+                    if (davkovacID != davkovac.mainPart) {
+                        self.infoBox = self.createInfoBox(e, davkovac.getSon(davkovacID));
+                    }
 				}
 			);
 			UTIL.addEvent( nodeEl, 'mouseleave',
 				function( e ) {
-                    var davkovacID = davkovac.usedID[self.id];
-					console.log('mouseleave ' + davkovacID);
+                    if (self.infoBox != undefined) {
+                        self.infoBox.parentElement.removeChild(self.infoBox);
+                    }
 				}
 			);
 		},
+        
+        createInfoBox: function( event, son ) {
+            var x = event.pageX + 'px';
+            var y = event.pageY + 'px';
+            var div = $('<div>').css({
+                "position": "absolute",                    
+                "left": x,
+                "top": y,
+                
+                "background-color": "white",
+                "padding": "5px",
+                
+                "border-style": "solid",
+                "border-color": "black",
+                "border-width": "1px",
+                "border-radius": "5px",
+            });
+            
+            var ul = div.append('<ul></ul>').find('ul');
+            ul.append('<li>Program: ' + son.program + '</li>');
+            ul.append('<li>Dátum uzavretia zmluvy: ' + son.datumUzavretia + '</li>');
+            ul.append('<li>Dátum vypršania zmluvy: ' + son.datumKoncaZmluvy + '</li>');
+            div.appendTo(document.body);
+            
+            return div[0];
+        },
 
 		/**
 		 * @returns {TreeNode}
@@ -2330,12 +2359,8 @@
             davkovac.addSon(item[0], item[1], item[2], item[3], item[4], item[5], item[6]);
         });
         davkovac.updateParents().updateNumber();
-        davkovac.clicked = 7;
-        
-        window.arr = davkovac.createTree();
-        console.log(window.arr);
-        
-        var jsonConfig = JSONconfig.make( window.arr );
+
+        var jsonConfig = JSONconfig.make( davkovac.createTree() );
 
 		// optional
 		if ( jQuery ) {
@@ -2348,6 +2373,7 @@
 
 	Treant.prototype.destroy = function() {
 		TreeStore.destroy( this.tree.id );
+        davkovac = null;
 	};
 
 	/* expose constructor globally */
