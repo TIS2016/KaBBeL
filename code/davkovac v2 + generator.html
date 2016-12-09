@@ -1,0 +1,568 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+    <title> Collapsable example </title>
+    <link rel="stylesheet" href="Treant.css">
+    <link rel="stylesheet" href="collapsable.css">
+    <link rel="stylesheet" href="vendor/perfect-scrollbar/perfect-scrollbar.css">
+</head>
+<body>
+    <div class="chart" id="collapsable-example"></div>
+    <script src="vendor/raphael.js"></script>
+    <script src="Treant.js"></script>
+
+    <script src="vendor/jquery.min.js"></script>
+    <script src="vendor/jquery.easing.js"></script>
+
+    
+    <script>
+        /*
+        subor musi byt umiestnený spolu s collapsable.css v rovnakej zlozke ako je na ich gite treant.js aby sa vsetko spravne nacitalo... je to cisto pre dokazanie funkcnosti trieda ide ak ju premiestnite inam
+        Funkcie co potrebujete:
+            -extra info nieje zavysle od davkovaca ale mozu byt v nom ulozene, povazujem ze do pola podla indexu vramci struktury vlozite pole extra informacii[datum pridania, sluzba,datum zaplatenia]
+            -addSon zavolaj na kazdeho z databazy spolu s jeho hlavnymi udajmi, jeho id, id otca, zarobok, meno, po pridani vsetkych synov treba zavolat  x.updateParents(); x.updateNumber(); aby sa korektne volalo prepisanie a fungovalo zobrazenie
+            -createTree vrati strukturu rovno s configom a synami len to prilepte ako novy config
+            - nextSons prepne na dalsich 10 synov otca alebo na jeho prvych ak dalsich nema 
+        kratky example davkovaca mozete si pozriet nizsie
+        display number = kolko sa ich ma zobrazovat
+        do clicked dajte vzdy ID syna ktory bol naposledny kliknuty
+        Co este musim - pridat nacitanie posledne kliknuteho...
+        */
+        function vygenerujStrom(pocet) {
+            return vygenerujRozlozenie(pocet);
+
+            function spracujRozlozenie(pole) {
+                function spracujStrom(stromy) {
+                    var otcovia = [];
+                    for (var i = 0; i < stromy.length; i++) {
+                        var novySyn = new vytvorSyna(aktualneID)
+                        otcovia.push(novySyn);
+                        aktualneID++;
+                        for (var j = 0; j < stromy[i][0]; j++) {
+                            novySyn.synovia.push(new vytvorSyna(aktualneID));
+                            aktualneID++;
+                        }
+                        for (var j = 0; j < stromy[i][1]; j++) {
+                            novySyn.synovia[Math.floor(Math.random() * novySyn.synovia.length)].synovia.push(new vytvorSyna(aktualneID));
+                            aktualneID++;
+                        }
+                    }
+                    return otcovia;
+                }
+
+                var aktualneID = 1;
+                stromy = [];
+                pole.forEach(function (item) {
+                    stromy.push(spracujStrom(item));
+                });
+                var result = [];
+                stromy.forEach(function (strom) {
+                    result.push(flatten(strom));
+                })
+                //return result;
+                return zotatStromyZachranitBobry(result);
+            }
+            function flatten(strom) {
+                var result = [strom, []];
+                var naSpracovanie = strom;
+                var buduce = [];
+                while (naSpracovanie.length != 0) {
+                    buduce = [];
+                    naSpracovanie.forEach(function (item) {
+                        item.synovia.forEach(function (item2) {
+                            item2.otec = item;
+                            item2.otecID = item.id;
+                            result[1].push(item2);
+                            buduce.push(item2);
+                        })
+                    });
+                    naSpracovanie = buduce;
+                }
+                return result;
+            }
+            function zotatStromyZachranitBobry(poleStromov) {
+                var hlavnyStrom = poleStromov.pop();
+                var hlavnyOtec = new vytvorSyna(0);
+                hlavnyOtec.datumUzavretia = "8.12.2016";
+                for (var i = 0; i < hlavnyStrom[0].length; i++) {
+                    hlavnyStrom[0][i].otecID = 0;
+                    hlavnyStrom[0][i].otec = hlavnyOtec;
+
+                }
+                var previous = [];
+                var result = [];
+                result = result.concat(hlavnyStrom[1]);
+                result = result.concat(hlavnyStrom[0]);
+                var index = 0;
+                poleStromov.forEach(function (strom) {
+                    if (Math.random() < 0.3 || previous.length == 0) {
+                        index = Math.floor(Math.random() * result.length);
+                        strom[0].forEach(function (syn) {
+                            syn.otec = result[index];
+                            syn.otecID = result[index].id;
+                        });
+                    }
+                    else {
+                        index = Math.floor(Math.random() * previous.length);
+                        strom[0].forEach(function (syn) {
+                            syn.otec = previous[index];
+                            syn.otecID = previous[index].id;
+                        });
+                    }
+                    result = result.concat(strom[0]);
+                    result = result.concat(strom[1]);
+                    previous = strom[1];
+                })
+
+                return dodajExtraInfo(result);
+            }
+            function dodajExtraInfo(poleSynov) {
+                var prejdi = poleSynov;
+                var nasledujuce = [];
+                var udaje = null;
+                var result = [];
+
+
+
+                while (prejdi.length != 0) {
+                    //console.log("zostavaju " + prejdi.length);
+                    nasledujuce = [];
+                    prejdi.forEach(function (syn) {
+
+                        if (syn.otec.datumUzavretia == null) {
+                            nasledujuce.push(syn);
+                        }
+                        else {
+                            udaje = pridajSynoviDodatoneInfo(syn.otec.datumUzavretia);
+                            syn.datumUzavretia = udaje[0];
+                            syn.datumUkoncenia = udaje[2];
+                            syn.program = udaje[1];
+                            result.push(syn);
+                        }
+                    });
+                    prejdi = nasledujuce;
+
+                }
+                return result;
+            }
+            //datumUz,prog,datumKon
+            function vytvorSyna(jehoID) {
+                this.meno = generujMeno();
+                this.zarobok = 10 + Math.ceil(Math.random() * 300);
+                this.id = jehoID;
+                this.synovia = [];
+                this.otec = null;
+                this.otecID = null;
+                this.program = null;
+                this.datumUzavretia = null;
+                this.datumUkoncenia = null;
+            }
+
+            function pridajSynoviDodatoneInfo(otcovDatumPridania) {
+                var datumUzavretia = generujDatum(otcovDatumPridania);
+                var program = ["FREE", "SILVER", "GOLD", "VIP"];
+                shuffle(program);
+                program = program[0];
+                var datumUkoncenia = generujKonecnyDatum(datumUzavretia);
+                return [datumUzavretia, program, datumUkoncenia];
+            }
+            function shuffle(a) {
+                var j, x, i;
+                for (i = a.length; i; i--) {
+                    j = Math.floor(Math.random() * i);
+                    x = a[i - 1];
+                    a[i - 1] = a[j];
+                    a[j] = x;
+                }
+            }
+            function generujKonecnyDatum(datum) {
+                var vstup = datum.split('.');
+                var rok = eval(vstup[2]);
+                var mesiac = eval(vstup[1]) + 2;
+                var den = eval(vstup[0]);
+                if (mesiac > 12) {
+                    rok++;
+                    mesiac -= 12;
+                }
+                return "" + den + "." + mesiac + "." + rok;
+            }
+            function generujDatum(datum) {
+                var vstup = datum.split('.');
+
+                var aktualnyDen = eval(vstup[2]) * 366 + eval(vstup[1]) * 31 + eval(vstup[0]);
+                var resultDate = aktualnyDen + Math.ceil(Math.random() * 300);
+                var rok = Math.floor(resultDate / 366);
+                resultDate -= rok * 366;
+                var mesiac = Math.floor(resultDate / 30);
+                resultDate -= mesiac * 30;
+                if (resultDate == 0) {
+                    resultDate = 1;
+                }
+                if (mesiac == 0) {
+                    mesiac = 1;
+                }
+                return "" + resultDate + "." + mesiac + "." + rok;
+            }
+            function generujMeno() {
+                var meno = "";
+                krstneM = ['Melany', 'Virginia', 'Lauretta', 'Ryan', 'Araceli', 'Billye', 'Stacey', 'Carl', 'Lucinda', 'Teodora', 'Julee', 'Norma', 'Harland', 'Kali', 'Tommye', 'Mazie', 'Octavia', 'Daisey', 'Raul', 'Marcy', 'Rayna', 'Mica', 'Annette', 'Maragret', 'Eliz', 'Martina', 'Clementina', 'Daniel', 'Doloris', 'Shasta', 'Mirtha', 'Fleta', 'Pandora', 'Candelaria', 'Alan', 'Chan', 'Christene', 'Christiana', 'Hang', 'Florinda', 'Carri', 'Jermaine', 'Janiece', 'Scott', 'Tameka', 'Madeleine', 'Pam', 'Ardella', 'Many', 'Dede', 'Apolonia', 'Shanda', 'Denver', 'Shante', 'Margorie', 'Maryann', 'Jovita', 'Zonia', 'Marci', 'Almeda', 'Aileen', 'Lauri', 'Yasuko', 'Olen', 'Barbra', 'Verna', 'January', 'Herschel', 'Dave', 'Candyce', 'Freeman', 'Leonor', 'Mira', 'Meaghan', 'Shin', 'Zachery', 'Tina', 'Cristina', 'Zack', 'Gaylene', 'Shemika', 'Karol', 'Vennie', 'Meghann', 'Fatimah', 'Mafalda', 'Guadalupe', 'Frances', 'Tamra', 'Ashlee', 'Frederic', 'Margarito', 'Augustina', 'Jamee', 'Maynard', 'Yon', 'Krystle', 'Maya', 'Norine', 'Coral', 'Tanya', 'Eldora', 'Marquerite', 'Krysten', 'Lavonda', 'Maegan', 'Lavenia', 'Alona', 'Silvana', 'Delta', 'Onita', 'Renaldo', 'Dirk', 'Clarinda', 'Tamatha', 'Del', 'Robyn', 'Stormy', 'Genny', 'Latrisha', 'Marilou', 'Courtney', 'Arletta', 'Juli', 'Corene', 'Shaunte', 'Kasha', 'Sid', 'Eustolia', 'Gemma', 'Kizzy', 'Hester', 'Almeta', 'Chin', 'Irish', 'Manie', 'Soila', 'Isabella', 'Wilbert', 'Shelby', 'Tula', 'Rolanda', 'Xenia', 'Merry', 'Sherilyn', 'Harmony', 'Selena', 'Inocencia', 'Daren', 'Otto', 'Angeline', 'Tyron', 'Georgiann', 'Terese', 'Otelia', 'Mirian', 'Kendra', 'Garrett', 'Wilber', 'Izola', 'Sindy', 'Mee', 'Lavelle', 'Bridgette', 'Ashlyn', 'Winifred', 'Claribel', 'Sheridan', 'India', 'Jaquelyn', 'Roseanne', 'Muoi', 'Estefana', 'Reina', 'Jule', 'Donte', 'Buster', 'Stephany', 'Maximo', 'Pearlene', 'Carlo', 'Gerald', 'Asuncion', 'Cassondra', 'Gary', 'Risa', 'Kelli', 'Carolyne', 'Brook', 'Marya', 'Wilbur', 'Eunice', 'Julia', 'Bridget', 'Mariano', 'Man', 'Kimberely', 'Ethelyn', 'Librada', 'Olga', 'Myrl', 'Magdalena', 'Alphonse', 'Charlsie', 'Eliseo', 'Kiersten', 'Kris', 'Arlette', 'Rozanne', 'Colin', 'Kami', 'Malik', 'Fritz', 'Bob', 'Teresita', 'Wei', 'Season', 'Chet', 'Brendan', 'Sommer', 'Marylyn', 'Grady', 'Crystle', 'Penni', 'Devona', 'Riley', 'Dinorah', 'Jeffie', 'Monika', 'Dorine', 'Anette', 'Thresa', 'Felton', 'Nicolle', 'Lashawna', 'Rivka', 'Dominga', 'Cassey', 'Rochelle', 'Pamula', 'Tammara', 'Diedra', 'Noe', 'Prince', 'Korey', 'Nancie', 'Lien'];
+                meno += krstneM[Math.floor(Math.random() * krstneM.length)] + " " + generujPriezvisko();
+                return meno;
+            }
+            function generujPriezvisko() {
+                var possible = "BCDFGHJKLMNPQRSTVWXYZ";;
+
+                var priezvisko = "" + possible.charAt(Math.floor(Math.random() * possible.length));
+                possible1 = "bcdfghjklmnpqrstvwxyz";
+                possible2 = "aeiou";
+                for (i = 0; i < 5 + Math.random() * 8; i++) {
+                    if (i % 2 == 0) {
+                        priezvisko += possible2.charAt(Math.floor(Math.random() * possible2.length));
+                    }
+                    else {
+                        priezvisko += possible1.charAt(Math.floor(Math.random() * possible1.length));
+                    }
+                }
+                return priezvisko;
+            }
+            function vygenerujRozlozenie(kolko) {
+                function shuffle(a) {
+                    var j, x, i;
+                    for (i = a.length; i; i--) {
+                        j = Math.floor(Math.random() * i);
+                        x = a[i - 1];
+                        a[i - 1] = a[j];
+                        a[j] = x;
+                    }
+                }
+
+
+                function vygenerujSynov(uzHotovych) {
+                    pole = [];
+                    for (i = 1; i < 10 + Math.floor(25 * Math.random()) ; i++) {
+                        pole.push(Math.floor((i * i) / i));
+                    }
+                    shuffle(pole);
+                    pole2 = [];
+                    for (i = 1; i < pole.length + 1 ; i++) {
+                        pole2.push(Math.floor((i * i) / 2 / (kolko / celkovyPocet)));
+                    }
+                    shuffle(pole2);
+
+                    var synovia = [];
+
+                    for (i = 0; i < pole.length; i++) {
+                        synovia.push([pole[i], pole2[i]]);
+                    }
+                    return synovia;
+                }
+
+                function count(synovia) {
+                    var pocet = 0;
+                    synovia.forEach(function (prvok) {
+                        pocet += prvok[0] + prvok[1];
+                    });
+                    return pocet;
+                }
+                var celkovyPocet = 1;
+                rozneStromy = [];
+                while (celkovyPocet < kolko) {
+                    var temp = vygenerujSynov(celkovyPocet);
+                    rozneStromy.push(temp);
+                    celkovyPocet = celkovyPocet + count(temp);
+
+                }
+                return spracujRozlozenie(rozneStromy);
+            }
+        }
+
+        function simpleGeneracia(pocet) {
+            function pridajSynoviDodatocneInfo(otcovDatumPridania) {
+                var datumUzavretia = generujDatum(otcovDatumPridania);
+                var program = ["FREE", "SILVER", "GOLD", "VIP"];
+                shuffle(program);
+                program = program[0];
+                var datumUkoncenia = generujKonecnyDatum(datumUzavretia);
+                return [datumUzavretia, program, datumUkoncenia];
+            }
+            function shuffle(a) {
+                var j, x, i;
+                for (i = a.length; i; i--) {
+                    j = Math.floor(Math.random() * i);
+                    x = a[i - 1];
+                    a[i - 1] = a[j];
+                    a[j] = x;
+                }
+            }
+            function generujKonecnyDatum(datum) {
+                var vstup = datum.split('.');
+                var rok = eval(vstup[2]);
+                var mesiac = eval(vstup[1]) + 2;
+                var den = eval(vstup[0]);
+                if (mesiac > 12) {
+                    rok++;
+                    mesiac -= 12;
+                }
+                return "" + den + "." + mesiac + "." + rok;
+            }
+            function generujDatum(datum) {
+                var vstup = datum.split('.');
+
+                var aktualnyDen = eval(vstup[2]) * 366 + eval(vstup[1]) * 31 + eval(vstup[0]);
+                var resultDate = aktualnyDen + Math.ceil(Math.random() * 300);
+                var rok = Math.floor(resultDate / 366);
+                resultDate -= rok * 366;
+                var mesiac = Math.floor(resultDate / 30);
+                resultDate -= mesiac * 30;
+                if (resultDate == 0) {
+                    resultDate = 1;
+                }
+                if (mesiac == 0) {
+                    mesiac = 1;
+                }
+                return "" + resultDate + "." + mesiac + "." + rok;
+            }
+            function generujMeno() {
+                var meno = "";
+                krstneM = ['Melany', 'Virginia', 'Lauretta', 'Ryan', 'Araceli', 'Billye', 'Stacey', 'Carl', 'Lucinda', 'Teodora', 'Julee', 'Norma', 'Harland', 'Kali', 'Tommye', 'Mazie', 'Octavia', 'Daisey', 'Raul', 'Marcy', 'Rayna', 'Mica', 'Annette', 'Maragret', 'Eliz', 'Martina', 'Clementina', 'Daniel', 'Doloris', 'Shasta', 'Mirtha', 'Fleta', 'Pandora', 'Candelaria', 'Alan', 'Chan', 'Christene', 'Christiana', 'Hang', 'Florinda', 'Carri', 'Jermaine', 'Janiece', 'Scott', 'Tameka', 'Madeleine', 'Pam', 'Ardella', 'Many', 'Dede', 'Apolonia', 'Shanda', 'Denver', 'Shante', 'Margorie', 'Maryann', 'Jovita', 'Zonia', 'Marci', 'Almeda', 'Aileen', 'Lauri', 'Yasuko', 'Olen', 'Barbra', 'Verna', 'January', 'Herschel', 'Dave', 'Candyce', 'Freeman', 'Leonor', 'Mira', 'Meaghan', 'Shin', 'Zachery', 'Tina', 'Cristina', 'Zack', 'Gaylene', 'Shemika', 'Karol', 'Vennie', 'Meghann', 'Fatimah', 'Mafalda', 'Guadalupe', 'Frances', 'Tamra', 'Ashlee', 'Frederic', 'Margarito', 'Augustina', 'Jamee', 'Maynard', 'Yon', 'Krystle', 'Maya', 'Norine', 'Coral', 'Tanya', 'Eldora', 'Marquerite', 'Krysten', 'Lavonda', 'Maegan', 'Lavenia', 'Alona', 'Silvana', 'Delta', 'Onita', 'Renaldo', 'Dirk', 'Clarinda', 'Tamatha', 'Del', 'Robyn', 'Stormy', 'Genny', 'Latrisha', 'Marilou', 'Courtney', 'Arletta', 'Juli', 'Corene', 'Shaunte', 'Kasha', 'Sid', 'Eustolia', 'Gemma', 'Kizzy', 'Hester', 'Almeta', 'Chin', 'Irish', 'Manie', 'Soila', 'Isabella', 'Wilbert', 'Shelby', 'Tula', 'Rolanda', 'Xenia', 'Merry', 'Sherilyn', 'Harmony', 'Selena', 'Inocencia', 'Daren', 'Otto', 'Angeline', 'Tyron', 'Georgiann', 'Terese', 'Otelia', 'Mirian', 'Kendra', 'Garrett', 'Wilber', 'Izola', 'Sindy', 'Mee', 'Lavelle', 'Bridgette', 'Ashlyn', 'Winifred', 'Claribel', 'Sheridan', 'India', 'Jaquelyn', 'Roseanne', 'Muoi', 'Estefana', 'Reina', 'Jule', 'Donte', 'Buster', 'Stephany', 'Maximo', 'Pearlene', 'Carlo', 'Gerald', 'Asuncion', 'Cassondra', 'Gary', 'Risa', 'Kelli', 'Carolyne', 'Brook', 'Marya', 'Wilbur', 'Eunice', 'Julia', 'Bridget', 'Mariano', 'Man', 'Kimberely', 'Ethelyn', 'Librada', 'Olga', 'Myrl', 'Magdalena', 'Alphonse', 'Charlsie', 'Eliseo', 'Kiersten', 'Kris', 'Arlette', 'Rozanne', 'Colin', 'Kami', 'Malik', 'Fritz', 'Bob', 'Teresita', 'Wei', 'Season', 'Chet', 'Brendan', 'Sommer', 'Marylyn', 'Grady', 'Crystle', 'Penni', 'Devona', 'Riley', 'Dinorah', 'Jeffie', 'Monika', 'Dorine', 'Anette', 'Thresa', 'Felton', 'Nicolle', 'Lashawna', 'Rivka', 'Dominga', 'Cassey', 'Rochelle', 'Pamula', 'Tammara', 'Diedra', 'Noe', 'Prince', 'Korey', 'Nancie', 'Lien'];
+                meno += krstneM[Math.floor(Math.random() * krstneM.length)] + " " + generujPriezvisko();
+                return meno;
+            }
+            function generujPriezvisko() {
+                var possible = "BCDFGHJKLMNPQRSTVWXYZ";;
+
+                var priezvisko = "" + possible.charAt(Math.floor(Math.random() * possible.length));
+                possible1 = "bcdfghjklmnpqrstvwxyz";
+                possible2 = "aeiou";
+                for (var i = 0; i < 5 + Math.random() * 8; i++) {
+                    if (i % 2 == 0) {
+                        priezvisko += possible2.charAt(Math.floor(Math.random() * possible2.length));
+                    }
+                    else {
+                        priezvisko += possible1.charAt(Math.floor(Math.random() * possible1.length));
+                    }
+                }
+                return priezvisko;
+            }
+            function vytvorSyna(jehoID) {
+                this.meno = generujMeno();
+                this.zarobok = 10 + Math.ceil(Math.random() * 300);
+                this.id = jehoID;
+                this.otecID = null;
+                this.program = null;
+                this.datumUzavretia = null;
+                this.datumUkoncenia = null;
+            }
+
+            var poleSynov = [new vytvorSyna(0)];
+            poleSynov[0].datumUzavretia = "9.12.2016";
+            var novySyn = null;
+            var otec = null;
+            var dodatocne=null;
+            for (var i = 1; i < pocet; i++) {
+                console.log("generujem");
+                novySyn = new vytvorSyna(i);
+                otec = poleSynov[Math.floor(Math.random() * poleSynov.length)];
+                novySyn.otecID = otec.id;
+                
+                dodatocne = pridajSynoviDodatocneInfo(otec.datumUzavretia);
+                novySyn.datumUzavretia = dodatocne[0];
+                novySyn.datumUkoncenia = dodatocne[2];
+                novySyn.program = dodatocne[1];
+                poleSynov.push(novySyn);
+
+            }
+
+
+            return poleSynov;
+        }
+
+
+        function davkovac(id) {
+            this.mainPart = id;
+            this.clicked = id;
+            this.displayNumber = 10;
+            this.actual = false;
+            this.parts = [];
+            this.usedID = [];
+            this.config = {
+                container: "#collapsable-example",
+                animateOnInit: false,
+
+                node: {
+                    collapsable: true
+                },
+                animation: {
+                    nodeAnimation: "easeOutBounce",
+                    nodeSpeed: 0,
+                    connectorsAnimation: "bounce",
+                    connectorsSpeed: 0
+                }
+            }
+            this.addSon(id, id, 0, "Ja",null,null,null);
+
+        }
+        davkovac.prototype.addSon = function (myID, fatherID, zarobok, meno,datumUz,prog,datumKon) {
+            if (myID != this.mainPart) {
+                part = {
+                    datumUzavretia:datumUz,
+                    program: prog,
+                    datumKoncaZmluvy: datumKon,
+                    showing: 0,
+                    id:myID,
+                    sons: [],
+                    parent: fatherID,
+                    otec:null,
+                    parentID:fatherID,
+                    text: {
+                        name: meno,
+                        title: zarobok,
+                    }                    
+                }
+            }
+            else {
+                part = {
+                    showing: 0,
+                    id: myID,
+                    sons:[],
+                    collapsed: true,
+                    text: {
+                        name: meno,
+                    }
+                }
+            }
+            this.parts[myID] = part;
+        }
+        davkovac.prototype.update = function () {
+            if (this.actual) {
+                return;
+            }
+            this.actual = true;
+            //update parents
+            var self = this;
+            this.parts.forEach(function (part) {
+                if (part.id!= self.mainPart) {
+                    part.parent = self.parts[part.parent];
+                    part.parent.sons.push(part);
+                    part.otec = part.parent;
+                }
+            })
+        }
+        davkovac.prototype.getSon = function (id) {
+            return this.parts[id];
+        }
+        davkovac.prototype.nextSons = function (fatherID) {
+            var father = this.getSon(fatherID);
+            if (father.sons.length - (father.showing + 1) * this.displayNumber > 0) {
+                father.showing = father.showing + 1;
+            }
+            else {
+                father.showing = 0;
+            }
+        }
+        davkovac.prototype.uncollapse = function () {
+            this.parts[this.mainPart].collapsed = false;
+            if (this.clicked == this.mainPart) {
+                return;
+            }
+            nextParent=this.parts[this.clicked];
+            while (nextParent != this.parts[this.mainPart]) {
+                nextParent.collapsed = false;
+                nextParent = nextParent.parent;
+            }
+        }
+        davkovac.prototype.createTree = function () {
+            this.update();
+            var result = [];
+            result.push(this.config);
+            result.push(this.parts[this.mainPart]);
+            result = result.concat(this.novaStruktura());
+            this.uncollapse();
+            this.createUsedID(result);
+            return result;
+        }
+        davkovac.prototype.createUsedID=function(pole){
+            this.usedID = [];
+            for (i = 1; i < pole.length; i++) {
+                //console.log(pole[i]);
+                this.usedID[i-1]=pole[i].id;
+            }
+        }
+        davkovac.prototype.novaStruktura = function () {
+            var result = [];
+            var prechadzam = [this.parts[this.mainPart]];
+            var budemPrechadzat = [];
+            var self = this;
+            while (prechadzam.length != 0) {
+                budemPrechadzat = [];
+                prechadzam.forEach(function (part) {
+                    if (part.sons.length != 0) {
+                        part.collapsed = true;
+                    }
+                    for (var i = self.displayNumber * part.showing; i < self.displayNumber * part.showing + self.displayNumber && i < part.sons.length; i++) {
+                        result.push(part.sons[i]);
+                        budemPrechadzat.push(part.sons[i]);
+                    }
+                });
+                prechadzam = budemPrechadzat;
+            }
+            return result;
+        }
+        /*
+        x = new davkovac(10);
+        x.addSon(1, 10, 12, "nom1", null, null, null);
+        x.addSon(2, 10, 12, "nom2", null, null, null);
+        x.addSon(4, 10, 12, "nom3", null, null, null);
+        x.addSon(41, 10, 12, "nom4", null, null, null);
+        x.addSon(42, 10, 12, "nom5", null, null, null);
+        x.addSon(43, 10, 12, "nom6", null, null, null);
+        x.addSon(44, 10, 12, "nom7", null, null, null);
+        x.addSon(45, 10, 12, "nom8", null, null, null);
+        x.addSon(46, 10, 12, "nom9", null, null, null);
+        x.addSon(47, 10, 12, "nom10", null, null, null);
+        x.addSon(48, 10, 12, "nom11", null, null, null);
+        x.addSon(49, 10, 12, "nom12", null, null, null);
+        x.addSon(50, 10, 12, "nom13", null, null, null);
+        x.addSon(3, 2, 12, "XXX1", null, null, null);
+        x.addSon(5, 2, 12, "XXX2", null, null, null);
+        x.addSon(6, 2, 12, "XXX3", null, null, null);
+        x.addSon(7, 6, 12, "XXX3", null, null, null);
+
+        x.clicked = 10;
+        y = new Treant(x.createTree(), function () { }, $);
+        */
+
+
+        /*
+        var struktura = vygenerujStrom(1000);
+        console.log("DONE");
+        x = new davkovac(0);
+        struktura.forEach(function (syn) {
+            x.addSon(syn.id,syn.otecID,syn.zarobok,syn.meno,syn.datumUzavretia,syn.program,syn.datumUkoncenia);
+        })
+        console.log("DONE");*/
+
+        var simpleStruktura = simpleGeneracia(40000);
+        x = new davkovac(simpleStruktura[0].id);
+        var syn = null;
+        for (var i = 1; i < simpleStruktura.length; i++) {
+            console.log("tlacim");
+            syn = simpleStruktura[i];
+            x.addSon(syn.id, syn.otecID, syn.zarobok, syn.meno, syn.datumUzavretia, syn.program, syn.datumUkoncenia);
+        }
+        console.log("DONE");
+
+
+        /*
+        x.updateParents();
+        x.updateNumber();
+        y = new Treant(x.createTree(), function () { }, $);
+        console.log("DONE 2");
+        */
+        //y = x.createTree();
+    </script>
+</body>
+</html>
