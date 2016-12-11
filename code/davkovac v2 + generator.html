@@ -19,18 +19,7 @@
 
     
     <script>
-        /*
-        subor musi byt umiestnený spolu s collapsable.css v rovnakej zlozke ako je na ich gite treant.js aby sa vsetko spravne nacitalo... je to cisto pre dokazanie funkcnosti trieda ide ak ju premiestnite inam
-        Funkcie co potrebujete:
-            -extra info nieje zavysle od davkovaca ale mozu byt v nom ulozene, povazujem ze do pola podla indexu vramci struktury vlozite pole extra informacii[datum pridania, sluzba,datum zaplatenia]
-            -addSon zavolaj na kazdeho z databazy spolu s jeho hlavnymi udajmi, jeho id, id otca, zarobok, meno, po pridani vsetkych synov treba zavolat  x.updateParents(); x.updateNumber(); aby sa korektne volalo prepisanie a fungovalo zobrazenie
-            -createTree vrati strukturu rovno s configom a synami len to prilepte ako novy config
-            - nextSons prepne na dalsich 10 synov otca alebo na jeho prvych ak dalsich nema 
-        kratky example davkovaca mozete si pozriet nizsie
-        display number = kolko sa ich ma zobrazovat
-        do clicked dajte vzdy ID syna ktory bol naposledny kliknuty
-        Co este musim - pridat nacitanie posledne kliknuteho...
-        */
+        
         function vygenerujStrom(pocet) {
             return vygenerujRozlozenie(pocet);
 
@@ -380,7 +369,7 @@
             return poleSynov;
         }
 
-
+        //pri vytvoreni potrebuje hlavneho otca na vrchu
         function davkovac(id) {
             this.mainPart = id;
             this.clicked = id;
@@ -406,6 +395,7 @@
             this.addSon(id, id, 0, "Ja",null,null,null);
         }
 
+        //Prida syna do davkovaca a struktury
         davkovac.prototype.addSon = function (myID, fatherID, zarobok, meno,datumUz,prog,datumKon) {
             if (myID != this.mainPart) {
                 part = {
@@ -439,6 +429,7 @@
             }
             this.parts[myID] = part;
         }
+        //Do not use
         davkovac.prototype.update = function () {
             if (this.actual) {
                 return;
@@ -454,9 +445,11 @@
                 }
             })
         }
+        //vrati syna s tou ID
         davkovac.prototype.getSon = function (id) {
             return this.parts[id];
         }
+        //Prepne otcovi (jehoID) vramci davkovaca na dalsich X (definovane v konstruktore davkovaca = 5) synov
         davkovac.prototype.nextSons = function (fatherID) {
             var father = this.getSon(fatherID);
             if (father.sons.length - (father.showing + 1) * this.displayNumber > 0) {
@@ -466,6 +459,7 @@
                 father.showing = 0;
             }
         }
+        //Do not use
         davkovac.prototype.uncollapse = function () {
             this.parts[this.mainPart].collapsed = false;
             if (this.clicked == this.mainPart) {
@@ -477,6 +471,7 @@
                 nextParent = nextParent.parent;
             }
         }
+        //Do not use
         davkovac.prototype.createTree = function () {
             this.update();
             var result = [];
@@ -487,13 +482,15 @@
             this.createUsedID(result);
             return result;
         }
-        davkovac.prototype.createUsedID = function(pole){
+        //Do not use
+        davkovac.prototype.createUsedID = function (pole) {
             this.usedID = [];
             for (i = 1; i < pole.length; i++) {
                 //console.log(pole[i]);
                 this.usedID[i-1]=pole[i].id;
             }
         }
+        //Do not use
         davkovac.prototype.novaStruktura = function () {
             var result = [];
             var prechadzam = [this.parts[this.mainPart]];
@@ -515,21 +512,39 @@
             return result;
         }
 
-        //PODLA ID
+        //PODLA ID vytvori strom
         davkovac.prototype.createTreeByID = function (id) {
             this.update();
             var result = [];
             this.clicked = id;
             result.push(this.config);
-            result.push(this.createFather(id));
-            result = result.concat(this.copyThisStuff(this.novaStrukturaPodlaID(id),result[1]));
+            var newFather = this.createFather(id);
+            result = result.concat(this.toDepthFirst(this.copyThisStuff(this.novaStrukturaPodlaID(id), newFather), newFather));
             this.uncollapseByID(id);
             this.createUsedID(result);
             return result;
         }
-
+        //Do not use
+        davkovac.prototype.toDepthFirst = function (vyberaciePole, otec) {
+            var result = [otec];
+            var index = 0;
+            var i = 1;
+            var vybranyOtec;
+            while (result.length != vyberaciePole.length + 1) {
+                vybranyOtec = result[index];
+                i = 1;
+                vyberaciePole.forEach(function (prvok) {
+                    if (prvok.parentID == vybranyOtec.id) {
+                        result.splice(index+i,0,prvok);
+                        i++;
+                    }
+                })
+                index++;
+            }
+            return result;
+        }
+        //Do not use
         davkovac.prototype.copyThisStuff = function (synovia, otec) {
-            console.log(synovia);
             var result = [];
             var dalsiPrechadzany = [];
             var prechadzany = [otec];
@@ -572,7 +587,7 @@
             }
             return result;
         }
-
+        //Do not use
         davkovac.prototype.novaStrukturaPodlaID = function (id) {
             var result = [];
             var urovne = 1;
@@ -596,6 +611,7 @@
             }
             return result;
         }
+        //Do not use
         davkovac.prototype.uncollapseByID = function (id) {
             this.parts[id].collapsed = false;
             if (this.clicked == id) {
@@ -608,6 +624,7 @@
                 nextParent = nextParent.parent;
             }
         }
+        //Do not use
         davkovac.prototype.createFather = function (id) {
             part = {
                 showing: this.parts[id].showing,
