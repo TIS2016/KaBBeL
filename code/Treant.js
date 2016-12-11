@@ -15,7 +15,7 @@
  */
 
 ;(function(){
-    
+
     var Davkovac = function(id) {
         this.extraInfo = [];
         this.parts = [];
@@ -42,7 +42,7 @@
         this.addSon(id, id, 0, "Ja",null,null,null);
 
     }
-    
+
     Davkovac.prototype.changeConfig = function () {
         this.config = {
             container: "#collapsable-example",
@@ -63,7 +63,7 @@
     Davkovac.prototype.getInfo = function (id) {
         return this.extraInfo[id];
     }
-    
+
     Davkovac.prototype.addInfo = function (id, info) {
         return this.extraInfo[id] = info;
     }
@@ -79,7 +79,7 @@
                 text: {
                     name: zarobok,
                     title: meno,
-                }                    
+                }
             }
         }
         else {
@@ -107,7 +107,7 @@
         }
         return this;
     }
-    
+
     Davkovac.prototype.numberOfHisSons = function (compare) {
         var pocet = 0;
         var iterator = this.parts.keys()
@@ -124,11 +124,11 @@
 
         return pocet;
     }
-    
+
     Davkovac.prototype.getSon = function (id) {
         return this.parts[id];
     }
-    
+
     Davkovac.prototype.nextSons = function (fatherID) {
         var father = this.getSon(fatherID);
         if (this.numberOfSons[fatherID] - (this.showing[fatherID] + 1) * this.displayNumber > 0) {
@@ -166,7 +166,7 @@
             var part = fatherField[iter.value];
             if (part != undefined) {
                 this.parts[iter.value].collapsed = true;
-            
+
                 result[iter.value] = [];
                 selected = 0;
                 var next = fatherField[iter.value][selected + this.showing[iter.value] * this.displayNumber];
@@ -192,7 +192,7 @@
         }
         return resArray;
     }
-    
+
     Davkovac.prototype.stripFathers = function (fatherField) {
         var self = this;
         var stripFathers1 = function (fatherField, part) {
@@ -208,9 +208,9 @@
         }
         return stripFathers1(fatherField, this.mainPart);
     }
-    
+
     Davkovac.prototype.createTree = function () {
-        
+
         var result = [];
         result.push(this.config);
         result.push(this.parts[this.mainPart]);
@@ -235,7 +235,7 @@
         })
         return this;
     }
-    
+
     var davkovac = null;
 
 	var $ = null;
@@ -1798,20 +1798,51 @@
 
 		addSwitchEvent: function( nodeSwitch ) {
 			var self = this;
-			UTIL.addEvent( nodeSwitch, 'click',
+			UTIL.addEvent( nodeSwitch, 'mousedown',
 				function( e ) {
-					e.preventDefault();
-					if ( self.getTreeConfig().callback.onBeforeClickCollapseSwitch.apply( self, [ nodeSwitch, e ] ) === false ) {
-						return false;
-					}
+                    if (e.which == 1) {
+                        e.preventDefault();
+                        if (self.getTreeConfig().callback.onBeforeClickCollapseSwitch.apply(self, [nodeSwitch, e]) === false) {
+                            return false;
+                        }
+                        self.toggleCollapse();
 
-					self.toggleCollapse();
-
-					self.getTreeConfig().callback.onAfterClickCollapseSwitch.apply( self, [ nodeSwitch, e ] );
+                        self.getTreeConfig().callback.onAfterClickCollapseSwitch.apply(self, [nodeSwitch, e]);
+                    }
 				}
 			);
-		},
-		
+            UTIL.addEvent( nodeSwitch, 'mousedup',
+				function (e) {
+					if (e.which == 1) {
+						e.preventDefault();
+					}
+            });
+        },
+
+		addRightClickEvents: function ( nodeEl ) {
+			//TODO: pri update noveho davkovaca prerobit na vykresovanie podla ID.
+			//TODO: nastavit davkovac.clicked
+			//BUG: chrome nefunguje preventdefault()
+			var self = this;
+			UTIL.addEvent(nodeEl, 'mousedown', function (e) {
+				if (e.which == 3) {
+					e.preventDefault();
+                    if ( self.infoBox != undefined ) {
+                        self.infoBox.parentElement.removeChild(self.infoBox);
+					}
+				}
+            });
+			UTIL.addEvent(nodeEl, 'mouseup', function (e) {
+				if (e.which == 3) {
+					e.preventDefault();
+					//davkovac.clicked = self.id;
+                    davkovac.nextSons();
+                    treant.jsonStructure = JSONconfig.make(davkovac.createTree());
+                    treant.tree.reload();
+				}
+            });
+        },
+
 		addHoverEvents: function( nodeEl ) {
 			var self = this;
 			UTIL.addEvent( nodeEl, 'mouseenter',
@@ -2153,8 +2184,9 @@
 			if ( this.collapsed || (this.collapsable && this.childrenCount() && !this.stackParentId) ) {
 				this.createSwitchGeometry( tree, node );
 			}
-			
+
 			this.addHoverEvents( node );
+			this.addRightClickEvents( node );
 		}
 
 		tree.CONFIG.callback.onCreateNode.apply( tree, [this, node] );
