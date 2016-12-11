@@ -1800,99 +1800,106 @@
 			var self = this;
 			UTIL.addEvent( nodeSwitch, 'mousedown',
 				function( e ) {
-                    if (e.which == 1) {
-                        e.preventDefault();
-                        if (self.getTreeConfig().callback.onBeforeClickCollapseSwitch.apply(self, [nodeSwitch, e]) === false) {
-                            return false;
-                        }
-                        self.toggleCollapse();
-
-                        self.getTreeConfig().callback.onAfterClickCollapseSwitch.apply(self, [nodeSwitch, e]);
-                    }
+                			if (e.which == 1) {
+                        			e.preventDefault();
+                        			if (self.getTreeConfig().callback.onBeforeClickCollapseSwitch.apply(self, [nodeSwitch, e]) === false) {
+                            				return false;
+                       				}
+                        			self.toggleCollapse();
+                        			self.getTreeConfig().callback.onAfterClickCollapseSwitch.apply(self, [nodeSwitch, e]);
+                    			}	
 				}
 			);
-            UTIL.addEvent( nodeSwitch, 'mousedup',
+
+            		UTIL.addEvent( nodeSwitch, 'mousedup',
 				function (e) {
 					if (e.which == 1) {
 						e.preventDefault();
 					}
-            });
-        },
+            			}
+			);
+        	},
 
 		addRightClickEvents: function ( nodeEl ) {
 			//TODO: pri update noveho davkovaca prerobit na vykresovanie podla ID.
 			//TODO: nastavit davkovac.clicked
 			//BUG: chrome nefunguje preventdefault()
 			var self = this;
-			UTIL.addEvent(nodeEl, 'mousedown', function (e) {
-				if (e.which == 3) {
-					e.preventDefault();
-                    if ( self.infoBox != undefined ) {
-                        self.infoBox.parentElement.removeChild(self.infoBox);
+			UTIL.addEvent(nodeEl, 'mousedown',
+				function (e) {
+					if (e.which == 3) {
+						e.preventDefault();
+                    				if ( self.infoBox != undefined ) {
+                        				self.infoBox.parentElement.removeChild(self.infoBox);
+						}
 					}
-				}
-            });
-			UTIL.addEvent(nodeEl, 'mouseup', function (e) {
-				if (e.which == 3) {
-					e.preventDefault();
-					var id = davkovac.usedID[self.id];
-					//davkovac.clicked = id;
-                    //davkovac.nextSons(id);
-                    //treant.jsonStructure = JSONconfig.make(davkovac.createTreeByID(id));
-                    treant.jsonStructure = JSONconfig.make(davkovac.createTree());
-                    treant.tree.reload();
-				}
-            });
-        },
+            			}
+			);
+		
+			UTIL.addEvent(nodeEl, 'mouseup',
+				function (e) {
+					if (e.which == 3) {
+						e.preventDefault();
+						var id = davkovac.usedID[self.id];
+						//davkovac.clicked = id;
+		                    		//davkovac.nextSons(id);
+                    				//treant.jsonStructure = JSONconfig.make(davkovac.createTreeByID(id));
+                    				treant.jsonStructure = JSONconfig.make(davkovac.createTree());
+                    				treant.tree.reload();
+					}
+            			}
+			);
+        	},
 
 		addHoverEvents: function( nodeEl ) {
 			var self = this;
 			UTIL.addEvent( nodeEl, 'mouseenter',
 				function( e ) {
-                    var davkovacID = davkovac.usedID[self.id];
-                    if (davkovacID != davkovac.mainPart) {
-                        self.infoBox = self.createInfoBox(e, davkovac.getSon(davkovacID));
-                    }
+                    			var davkovacID = davkovac.usedID[self.id];
+                    			if (davkovacID != davkovac.mainPart) {
+                        			self.infoBox = self.createInfoBox(e, davkovac.getSon(davkovacID));
+                    			}
 				}
 			);
 
 			UTIL.addEvent( nodeEl, 'mouseleave',
 				function( e ) {
-                    if (self.infoBox != undefined) {
-                        self.infoBox.parentElement.removeChild(self.infoBox);
-                    }
+                    			if (self.infoBox != undefined) {
+                        			self.infoBox.parentElement.removeChild(self.infoBox);
+                    			}
 				}
 			);
 		},
         
-        createInfoBox: function( event, son ) {
-            var x = event.pageX + 'px';
-            var y = event.pageY + 'px';
-            var div = $('<div>').css({
-                'position': 'absolute',                    
-                'left': x,
-                'top': y,
+        	createInfoBox: function( event, son ) {
+        		var x = event.pageX + 'px';
+	            	var y = event.pageY + 'px';
+        	    	var div = $('<div>').css({
+                		'position': 'absolute',                    
+                		'left': x,
+	                	'top': y,
                 
-                'background-color': 'white',
-                'padding': '5px',
+        	        	'background-color': 'white',
+	        	        'padding': '5px',
                 
-                'border-style': 'solid',
-                'border-color': 'black',
-                'border-width': '1px',
-                'border-radius': '5px',
-            });
+	                	'border-style': 'solid',
+	        	        'border-color': 'black',
+        	        	'border-width': '1px',
+	        	        'border-radius': '5px',
+            		});
             
-            var ul = div.append('<ul></ul>').find('ul');
-            ul.css({
-                'list-style-type': 'none'
-            });
-            ul.append('<li>Program: ' + son.program + '</li>');
-            ul.append('<li>Dátum uzavretia zmluvy: ' + son.datumUzavretia + '</li>');
-            ul.append('<li>Dátum vypršania zmluvy: ' + son.datumKoncaZmluvy + '</li>');
-            div.appendTo(document.body);
-            
-            return div[0];
-        },
+            		var ul = div.append('<ul></ul>').find('ul');
+            		ul.css({
+                		'list-style-type': 'none'
+            		});
+
+	        	ul.append('<li>Program: ' + son.program + '</li>');
+        		ul.append('<li>Dátum uzavretia zmluvy: ' + son.datumUzavretia + '</li>');
+	            	ul.append('<li>Dátum vypršania zmluvy: ' + son.datumKoncaZmluvy + '</li>');
+        	    	div.appendTo(document.body);
+            	
+            		return div[0];
+		},
 
 		/**
 		 * @returns {TreeNode}
