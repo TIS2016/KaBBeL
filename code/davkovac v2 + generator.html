@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8">
@@ -384,7 +384,8 @@
         function davkovac(id) {
             this.mainPart = id;
             this.clicked = id;
-            this.displayNumber = 10;
+            this.displayNumber = 5;
+            this.grafDepth = 3;
             this.actual = false;
             this.parts = [];
             this.usedID = [];
@@ -403,8 +404,8 @@
                 }
             }
             this.addSon(id, id, 0, "Ja",null,null,null);
-
         }
+
         davkovac.prototype.addSon = function (myID, fatherID, zarobok, meno,datumUz,prog,datumKon) {
             if (myID != this.mainPart) {
                 part = {
@@ -416,7 +417,8 @@
                     sons: [],
                     parent: fatherID,
                     otec:null,
-                    parentID:fatherID,
+                    parentID: fatherID,
+                    hlbka:0,
                     text: {
                         name: meno,
                         title: zarobok,
@@ -429,6 +431,7 @@
                     id: myID,
                     sons:[],
                     collapsed: true,
+                    hlbka: 0,
                     text: {
                         name: meno,
                     }
@@ -484,7 +487,7 @@
             this.createUsedID(result);
             return result;
         }
-        davkovac.prototype.createUsedID=function(pole){
+        davkovac.prototype.createUsedID = function(pole){
             this.usedID = [];
             for (i = 1; i < pole.length; i++) {
                 //console.log(pole[i]);
@@ -511,29 +514,138 @@
             }
             return result;
         }
-        /*
-        x = new davkovac(10);
-        x.addSon(1, 10, 12, "nom1", null, null, null);
-        x.addSon(2, 10, 12, "nom2", null, null, null);
-        x.addSon(4, 10, 12, "nom3", null, null, null);
-        x.addSon(41, 10, 12, "nom4", null, null, null);
-        x.addSon(42, 10, 12, "nom5", null, null, null);
-        x.addSon(43, 10, 12, "nom6", null, null, null);
-        x.addSon(44, 10, 12, "nom7", null, null, null);
-        x.addSon(45, 10, 12, "nom8", null, null, null);
-        x.addSon(46, 10, 12, "nom9", null, null, null);
-        x.addSon(47, 10, 12, "nom10", null, null, null);
-        x.addSon(48, 10, 12, "nom11", null, null, null);
-        x.addSon(49, 10, 12, "nom12", null, null, null);
-        x.addSon(50, 10, 12, "nom13", null, null, null);
-        x.addSon(3, 2, 12, "XXX1", null, null, null);
-        x.addSon(5, 2, 12, "XXX2", null, null, null);
-        x.addSon(6, 2, 12, "XXX3", null, null, null);
-        x.addSon(7, 6, 12, "XXX3", null, null, null);
 
-        x.clicked = 10;
-        y = new Treant(x.createTree(), function () { }, $);
-        */
+        //PODLA ID
+        davkovac.prototype.createTreeByID = function (id) {
+            this.update();
+            var result = [];
+            this.clicked = id;
+            result.push(this.config);
+            result.push(this.createFather(id));
+            result = result.concat(this.copyThisStuff(this.novaStrukturaPodlaID(id),result[1]));
+            this.uncollapseByID(id);
+            this.createUsedID(result);
+            return result;
+        }
+
+        davkovac.prototype.copyThisStuff = function (synovia, otec) {
+            console.log(synovia);
+            var result = [];
+            var dalsiPrechadzany = [];
+            var prechadzany = [otec];
+            var dalsiSynovia = [];
+            while (prechadzany.length != 0) {
+                dalsiPrechadzany = [];
+                prechadzany.forEach(function (otec) {
+                    synovia.forEach(function (syn) {
+                        if (syn.parentID == otec.id) {
+                            var part = {
+                                datumUzavretia: syn.datumUzavretia,
+                                program: syn.program,
+                                datumKoncaZmluvy: syn.datumKoncaZmluvy,
+                                showing: syn.showing,
+                                id: syn.id,
+                                sons: syn.sons,
+                                parent: otec,
+                                otec: otec,
+                                parentID: otec.id,
+                                hlbka: syn.hlbka,
+                                text: {
+                                    name: syn.text.name,
+                                    title: syn.text.title,
+                                }
+                            }
+                            if (syn.collapsed != undefined) {
+                                part.collapsed = true;
+                            }
+                            result.push(part);
+                            dalsiPrechadzany.push(part);
+                        }
+                        else {
+                            dalsiSynovia.push(syn);
+                        }
+                    });
+                    synovia = dalsiSynovia;
+                })
+                prechadzany = dalsiPrechadzany;
+                
+            }
+            return result;
+        }
+
+        davkovac.prototype.novaStrukturaPodlaID = function (id) {
+            var result = [];
+            var urovne = 1;
+            var prechadzam = [this.parts[id]];
+            var budemPrechadzat = [];
+            var self = this;
+            while (prechadzam.length != 0&&urovne<self.grafDepth) {
+                budemPrechadzat = [];
+                prechadzam.forEach(function (part) {
+                    if (part.sons.length != 0) {
+                        part.collapsed = true;
+                    }
+                    part.hlbka = urovne;
+                    for (var i = self.displayNumber * part.showing; i < self.displayNumber * part.showing + self.displayNumber && i < part.sons.length; i++) {
+                        result.push(part.sons[i]);
+                        budemPrechadzat.push(part.sons[i]);
+                    }
+                });
+                prechadzam = budemPrechadzat;
+                urovne++;
+            }
+            return result;
+        }
+        davkovac.prototype.uncollapseByID = function (id) {
+            this.parts[id].collapsed = false;
+            if (this.clicked == id) {
+                console.log("fine");
+                return;
+            }
+            nextParent = this.parts[this.clicked];
+            while (nextParent != this.parts[id]) {
+                nextParent.collapsed = false;
+                nextParent = nextParent.parent;
+            }
+        }
+        davkovac.prototype.createFather = function (id) {
+            part = {
+                showing: this.parts[id].showing,
+                id: id,
+                sons: this.parts[id].sons,
+                collapsed: true,
+                hlbka: 0,
+                text: {
+                    name: this.parts[id].text.name,
+                }
+            }
+            return part;
+        }
+
+        x = new davkovac(10);
+        x.addSon(1, 10, 12, "a1", null, null, null);
+        x.addSon(2, 10, 12, "a2", null, null, null);
+        x.addSon(4, 10, 12, "a3", null, null, null);
+        x.addSon(41, 10, 12, "a4", null, null, null);
+        x.addSon(42, 10, 12, "a5", null, null, null);
+        x.addSon(43, 10, 12, "a6", null, null, null);
+        x.addSon(44, 10, 12, "a7", null, null, null);
+        x.addSon(45, 10, 12, "a8", null, null, null);
+        x.addSon(46, 10, 12, "a9", null, null, null);
+        x.addSon(47, 10, 12, "a10", null, null, null);
+        x.addSon(48, 10, 12, "a11", null, null, null);
+        x.addSon(49, 10, 12, "a12", null, null, null);
+        x.addSon(50, 10, 12, "a13", null, null, null);
+        x.addSon(3, 2, 12, "b1", null, null, null);
+        x.addSon(5, 2, 12, "b2", null, null, null);
+        x.addSon(6, 2, 12, "b3", null, null, null);
+        x.addSon(7, 6, 12, "c1", null, null, null);
+        x.addSon(100, 6, 12, "c2", null, null, null);
+        x.addSon(8, 7, 12, "d1", null, null, null);
+        x.addSon(9, 8, 12, "e1", null, null, null);
+        x.addSon(14, 9, 12, "f1", null, null, null);
+        y = new Treant(x.createTreeByID(6), function () { }, $);
+        
 
 
         /*
@@ -545,6 +657,8 @@
         })
         console.log("DONE");*/
 
+
+        /*
         var simpleStruktura = simpleGeneracia(40000);
         x = new davkovac(simpleStruktura[0].id);
         var syn = null;
@@ -553,7 +667,7 @@
             syn = simpleStruktura[i];
             x.addSon(syn.id, syn.otecID, syn.zarobok, syn.meno, syn.datumUzavretia, syn.program, syn.datumUkoncenia);
         }
-        console.log("DONE");
+        console.log("DONE");*/
 
 
         /*
