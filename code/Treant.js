@@ -1835,8 +1835,10 @@
 			UTIL.addEvent(nodeEl, 'mouseup', function (e) {
 				if (e.which == 3) {
 					e.preventDefault();
-					//davkovac.clicked = self.id;
-                    davkovac.nextSons();
+					var id = davkovac.usedID[self.id];
+					//davkovac.clicked = id;
+                    //davkovac.nextSons(id);
+                    //treant.jsonStructure = JSONconfig.make(davkovac.createTreeByID(id));
                     treant.jsonStructure = JSONconfig.make(davkovac.createTree());
                     treant.tree.reload();
 				}
@@ -1853,6 +1855,7 @@
                     }
 				}
 			);
+
 			UTIL.addEvent( nodeEl, 'mouseleave',
 				function( e ) {
                     if (self.infoBox != undefined) {
