@@ -1810,14 +1810,6 @@
                     			}	
 				}
 			);
-
-            		UTIL.addEvent( nodeSwitch, 'mousedup',
-				function (e) {
-					if (e.which == 1) {
-						e.preventDefault();
-					}
-            			}
-			);
         	},
 
 		addRightClickEvents: function ( nodeEl ) {
@@ -1825,31 +1817,26 @@
 			//TODO: nastavit davkovac.clicked
 			//BUG: chrome nefunguje preventdefault()
 			var self = this;
-			UTIL.addEvent(nodeEl, 'mousedown',
+
+			UTIL.addEvent(nodeEl, 'contextmenu',
 				function (e) {
-					if (e.which == 3) {
-						e.preventDefault();
-                    				if ( self.infoBox != undefined ) {
-                        				self.infoBox.parentElement.removeChild(self.infoBox);
+       		   	        	e.preventDefault();
+                    			if (e.which == 3) {
+                   				if ( self.infoBox != undefined ) {
+			                       		self.infoBox.parentElement.removeChild(self.infoBox);
 						}
-					}
-            			}
+                
+						//var id = davkovac.usedID[self.id];
+			                        //davkovac.clicked = id;
+                        			//davkovac.nextSons(id);
+			                        //console.log(id);
+                        			//treant.jsonStructure = JSONconfig.make(davkovac.createTreeByID(id));
+			                        //treant.jsonStructure = JSONconfig.make(davkovac.createTree());
+                        			treant.tree.reload();
+                       			}
+           			}
 			);
-		
-			UTIL.addEvent(nodeEl, 'mouseup',
-				function (e) {
-					if (e.which == 3) {
-						e.preventDefault();
-						var id = davkovac.usedID[self.id];
-						//davkovac.clicked = id;
-		                    		//davkovac.nextSons(id);
-                    				//treant.jsonStructure = JSONconfig.make(davkovac.createTreeByID(id));
-                    				treant.jsonStructure = JSONconfig.make(davkovac.createTree());
-                    				treant.tree.reload();
-					}
-            			}
-			);
-        	},
+       		},
 
 		addHoverEvents: function( nodeEl ) {
 			var self = this;
