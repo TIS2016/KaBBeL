@@ -1,0 +1,13 @@
+Zapisnica zo stretnutia s cviciacim
+
+Pritomni: Kellner, Bilisics, Bohumel
+
+Vykonane:
+- nova verzia davkovaca, bude treba opat upravit.
+- pridanie eventy pre right click, hover.
+
+Dohodnute:
+- piatok (16.12)  programatorske stretnutie.
+- imlementovat novy davkovac.
+- update right click, left click.
+- kedze dalsie stretnutie (zatial nedohodnute) bude az v januari, tak implementovat, co bude treba.
