@@ -50,7 +50,7 @@
                     result.push(flatten(strom));
                 })
                 //return result;
-                return zotatStromyZachranitBobry(result);
+                return [0].concat(zotatStromyZachranitBobry(result));
             }
             function flatten(strom) {
                 var result = [strom, []];
@@ -366,6 +366,15 @@
 
             return poleSynov;
         }
+         /*
+        var struktura = vygenerujStrom(1000);
+       
+        console.log("DONE");*/
+
+
+        /*
+        var simpleStruktura = simpleGeneracia(40000);
+        console.log("DONE");*/
 
         var config = [
             [10, 10, 12,   "Ja",  null, null, null],
