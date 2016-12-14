@@ -366,6 +366,15 @@
 
             return poleSynov;
         }
+        function generatedToArray(poleTried) {
+            var result = [[poleTried[0].id]];
+            var spracovane = [];
+            for (var i = 1; i < poleTried.length; i++) {
+                spracovane = [poleTried[i].id, poleTried[i].otecID, poleTried[i].meno, poleTried[i].zarobok, poleTried[i].datumUzavretia, poleTried[i].program, poleTried[i].datumUkoncenia];
+                result.push(spracovane);
+            }
+            return result;
+        }
          /*
         var struktura = vygenerujStrom(1000);
        
