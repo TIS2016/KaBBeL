@@ -1,0 +1,10 @@
+Zapisnica z 14.12.2016
+Pritomni: Kellner, Bilisicz, Bohumel
+
+Vykonane:
+	- prve implementacne kroky, pokus o right click, left click, hover.
+	- davkovac (viacero verzii) 
+Dohodnute:
+	- dalsie stretnutie s konzultantom v januari, presny termin neurceny zatial
+	- implementovat po finalnu verziu
+	- piatok 16.12.2016 -- implementacne stretko kto moze
