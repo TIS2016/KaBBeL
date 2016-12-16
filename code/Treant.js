@@ -23,7 +23,7 @@
     this.actual = false;
     this.parts = [];
     this.currentTree = [];
-    this.maxShow=10;
+    this.maxShow=1000;
     this.config = {
 	container: "#collapsable-example",
 	animateOnInit: false,
@@ -33,16 +33,16 @@
 	},
 	animation: {
 	    nodeAnimation: "easeOutBounce",
-	    nodeSpeed: 0,
+	    nodeSpeed: 0, //450
 	    connectorsAnimation: "bounce",
-	    connectorsSpeed: 0
+	    connectorsSpeed: 0 //450
 	}
     }
     this.addSon(id, id,"Ja", 0,null,null,null);
 }
 
-//Prida syna do davkovaca a struktury
-davkovac.prototype.addSon = function (myID, fatherID, meno,zarobok, datumUz, prog, datumKon) {
+//Prida syna do Davkovaca a struktury
+Davkovac.prototype.addSon = function (myID, fatherID, meno,zarobok, datumUz, prog, datumKon) {
     if (myID != this.mainPart) {
 	part = {
 	    datumUzavretia:datumUz,
@@ -76,7 +76,7 @@ davkovac.prototype.addSon = function (myID, fatherID, meno,zarobok, datumUz, pro
     this.parts[myID] = part;
 }
 //Do not use
-davkovac.prototype.update = function () {
+Davkovac.prototype.update = function () {
     if (this.actual) {
 	return;
     }
@@ -92,11 +92,11 @@ davkovac.prototype.update = function () {
     })
 }
 //vrati syna s tou ID
-davkovac.prototype.getSon = function (id) {
+Davkovac.prototype.getSon = function (id) {
     return this.parts[id];
 }
-//Prepne otcovi (jehoID) vramci davkovaca na dalsich X (definovane v konstruktore davkovaca = 5) synov
-davkovac.prototype.nextSons = function (fatherID) {
+//Prepne otcovi (jehoID) vramci Davkovaca na dalsich X (definovane v konstruktore Davkovaca = 5) synov
+Davkovac.prototype.nextSons = function (fatherID) {
     var father = this.getSon(fatherID);
     if (father.sons.length - (father.showing + 1) * this.displayNumber > 0) {
 	father.showing = father.showing + 1;
@@ -106,7 +106,7 @@ davkovac.prototype.nextSons = function (fatherID) {
     }
 }
 //Do not use
-davkovac.prototype.uncollapse = function () {
+Davkovac.prototype.uncollapse = function () {
     this.parts[this.mainPart].collapsed = false;
     if (this.clicked == this.mainPart) {
 	return;
@@ -118,7 +118,7 @@ davkovac.prototype.uncollapse = function () {
     }
 }
 //Do not use
-davkovac.prototype.novaStrukturasMaximom = function () {
+Davkovac.prototype.novaStrukturasMaximom = function () {
     var result = [];
     var prechadzam = [this.parts[this.mainPart]];
     var budemPrechadzat = [];
@@ -145,7 +145,7 @@ davkovac.prototype.novaStrukturasMaximom = function () {
 }
 
 //Vrati true ak su zobrazeni synovia osoby s ID
-davkovac.prototype.ZobrazeniSynovia = function (hladaneID) {
+Davkovac.prototype.ZobrazeniSynovia = function (hladaneID) {
     for (var i = 1; i < this.currentTree.length;i++){
 	if (hladaneID==this.currentTree[i].parentID) {
 	    return true;
@@ -155,7 +155,7 @@ davkovac.prototype.ZobrazeniSynovia = function (hladaneID) {
 }
 
 //Do not use
-davkovac.prototype.toDepthFirst = function (vyberaciePole) {
+Davkovac.prototype.toDepthFirst = function (vyberaciePole) {
 
     var result = [vyberaciePole[0]];
     var index = 0;
@@ -177,7 +177,7 @@ davkovac.prototype.toDepthFirst = function (vyberaciePole) {
     return result;
 }
         //Vola sa pri kontrukcii. Je to strom do takej hlbky, ktora je tesne nad 1000 prvkov. (this.maxShow)
-        davkovac.prototype.createFirstTree = function () {
+        Davkovac.prototype.createFirstTree = function () {
             this.update();
             var result = [];
             result.push(this.config);
@@ -186,7 +186,7 @@ davkovac.prototype.toDepthFirst = function (vyberaciePole) {
             return result;
         }
         //Pri leftclicku na syna ktory nema nacitanych synov, vracia novy strom aj s jeho synami
-        davkovac.prototype.extendTree = function (id) {
+        Davkovac.prototype.extendTree = function (id) {
             var result=this.currentTree
             var part = this.getSon(id);
             for (var i = this.displayNumber * part.showing; i < this.displayNumber * part.showing + this.displayNumber && i < part.sons.length; i++) {
@@ -195,11 +195,11 @@ davkovac.prototype.toDepthFirst = function (vyberaciePole) {
                     part.sons[i].collapsed = true;
                 }
             }
-            this.currentTree = result;
-            return [this.config].concat(result);
+            this.currentTree = this.toDepthFirst(result);
+            return [this.config].concat(this.currentTree);
         }
         //Do not use
-        davkovac.prototype.novaStrukturaPoZmeneSynov= function (IDZmeny) {
+        Davkovac.prototype.novaStrukturaPoZmeneSynov= function (IDZmeny) {
             var result = [];
             var prechadzam = [this.parts[this.mainPart]];
             var budemPrechadzat = [];
@@ -222,8 +222,8 @@ davkovac.prototype.toDepthFirst = function (vyberaciePole) {
     }
     return result;
 }
-//Vola sa ked sa prepnu synovia s ID clickuteho... ID musi byt ID v davkovaci!
-davkovac.prototype.createChangedTree = function (IDZmeny) {
+//Vola sa ked sa prepnu synovia s ID clickuteho... ID musi byt ID v Davkovaci!
+Davkovac.prototype.createChangedTree = function (IDZmeny) {
     this.update();
     var result = [];
     result.push(this.config);
@@ -1804,6 +1804,15 @@ davkovac.prototype.createChangedTree = function (IDZmeny) {
                         			if (self.getTreeConfig().callback.onBeforeClickCollapseSwitch.apply(self, [nodeSwitch, e]) === false) {
                             				return false;
                        				}
+											if ( davkovac.currentTree[self.id].sons.length > 0 ) {
+												if ( davkovac.currentTree[self.id].collapsed ) {
+													davkovac.currentTree[self.id].collapsed = false;
+												} else {
+													davkovac.currentTree[self.id].collapsed = true;												
+												}
+											}                  				
+                       				
+                       				
                         			self.toggleCollapse();
                         			self.getTreeConfig().callback.onAfterClickCollapseSwitch.apply(self, [nodeSwitch, e]);
                     			}	
@@ -1812,26 +1821,22 @@ davkovac.prototype.createChangedTree = function (IDZmeny) {
         	},
 
 		addRightClickEvents: function ( nodeEl ) {
-			//TODO: pri update noveho davkovaca prerobit na vykresovanie podla ID.
-			//TODO: nastavit davkovac.clicked
-			//BUG: chrome nefunguje preventdefault()
+			//TODO: pri update noveho Davkovaca prerobit na vykresovanie podla ID.
+			//TODO: nastavit Davkovac.clicked
 			var self = this;
-
 			UTIL.addEvent(nodeEl, 'contextmenu',
 				function (e) {
        		   	        	e.preventDefault();
                     			if (e.which == 3) {
-                   				if ( self.infoBox != undefined ) {
+                   				if ( self.infoBox != null ) {
 			                       		self.infoBox.parentElement.removeChild(self.infoBox);
 						}
                 
-						//var id = davkovac.usedID[self.id];
-			                        //davkovac.clicked = id;
-                        			//davkovac.nextSons(id);
-			                        //console.log(id);
-                        			//treant.jsonStructure = JSONconfig.make(davkovac.createTreeByID(id));
-			                        //treant.jsonStructure = JSONconfig.make(davkovac.createTree());
-                        			treant.tree.reload();
+						var id = davkovac.currentTree[self.id].id;
+			                        //davkovac.nextSons(id);
+			                        //treant.destoy;
+			                        //treant.tree.initJsonConfig = JSONconfig.make(davkovac.createChangedTree(id));
+			                        treant.tree.reload();
                        			}
            			}
 			);
@@ -1841,9 +1846,9 @@ davkovac.prototype.createChangedTree = function (IDZmeny) {
 			var self = this;
 			UTIL.addEvent( nodeEl, 'mouseenter',
 				function( e ) {
-                    			var davkovacID = davkovac.usedID[self.id];
-                    			if (davkovacID != davkovac.mainPart) {
-                        			self.infoBox = self.createInfoBox(e, davkovac.getSon(davkovacID));
+									                    			
+                    			if (davkovac.currentTree[self.id].id != davkovac.mainPart) {
+                        			self.infoBox = self.createInfoBox(e, davkovac.currentTree[self.id]);
                     			}
 				}
 			);
@@ -2389,24 +2394,20 @@ davkovac.prototype.createChangedTree = function (IDZmeny) {
         config.forEach(function(item) {
             davkovac.addSon(item[0], item[1], item[2], item[3], item[4], item[5], item[6]);
         });
-        davkovac.updateParents().updateNumber();
 
-        var jsonConfig = JSONconfig.make( davkovac.createTree() );
+        var jsonConfig = JSONconfig.make( davkovac.createFirstTree());
 
 		// optional
 		if ( jQuery ) {
 			$ = jQuery;
 		}
-
 		this.tree = TreeStore.createTree( jsonConfig );
 		this.tree.positionTree( callback );
 	};
-
 	Treant.prototype.destroy = function() {
 		TreeStore.destroy( this.tree.id );
-        davkovac = null;
+       // davkovac = null;
 	};
-
 	/* expose constructor globally */
 	window.Treant = Treant;
 
