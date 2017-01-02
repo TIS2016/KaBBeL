@@ -17,224 +17,223 @@
 ;(function(){
 
     var Davkovac = function(id) {
-        this.extraInfo = [];
-        this.parts = [];
-        this.mainPart = id;
-        this.showing = [];
-        this.numberOfSons = [];
-        this.clicked = id;
-        this.usedID = [];
-        this.displayNumber = 10;
-        this.config = {
-            container: "#collapsable-example",
-            animateOnInit: true,
+    this.mainPart = id;
+    this.clicked = id;
+    this.displayNumber = 5;
+    this.actual = false;
+    this.parts = [];
+    this.currentTree = [];
+    this.maxShow=1000;
+    this.config = {
+	container: "#collapsable-example",
+	animateOnInit: false,
 
-            node: {
-                collapsable: true
-            },
-            animation: {
-                nodeAnimation: "easeOutBounce",
-                nodeSpeed: 700,
-                connectorsAnimation: "bounce",
-                connectorsSpeed: 700
-            }
-        }
-        this.addSon(id, id, 0, "Ja",null,null,null);
-
+	node: {
+	    collapsable: true
+	},
+	animation: {
+	    nodeAnimation: "easeOutBounce",
+	    nodeSpeed: 0, //450
+	    connectorsAnimation: "bounce",
+	    connectorsSpeed: 0 //450
+	}
     }
+    this.addSon(id, id,"Ja", 0,null,null,null);
+}
 
-    Davkovac.prototype.changeConfig = function () {
-        this.config = {
-            container: "#collapsable-example",
-            animateOnInit: false,
-
-            node: {
-                collapsable: true
-            },
-            animation: {
-                nodeAnimation: "easeOutBounce",
-                nodeSpeed: 700,
-                connectorsAnimation: "bounce",
-                connectorsSpeed: 700
-            }
-        }
+//Prida syna do Davkovaca a struktury
+Davkovac.prototype.addSon = function (myID, fatherID, meno,zarobok, datumUz, prog, datumKon) {
+    if (myID != this.mainPart) {
+	part = {
+	    datumUzavretia:datumUz,
+	    program: prog,
+	    datumKoncaZmluvy: datumKon,
+	    showing: 0,
+	    id:myID,
+	    sons: [],
+	    parent: fatherID,
+	    otec:null,
+	    parentID: fatherID,
+	    hlbka:0,
+	    text: {
+		name: meno,
+		title: zarobok,
+	    }                    
+	}
     }
-
-    Davkovac.prototype.getInfo = function (id) {
-        return this.extraInfo[id];
+    else {
+	part = {
+	    showing: 0,
+	    id: myID,
+	    sons:[],
+	    collapsed: true,
+	    hlbka: 0,
+	    text: {
+		name: meno,
+	    }
+	}
     }
-
-    Davkovac.prototype.addInfo = function (id, info) {
-        return this.extraInfo[id] = info;
+    this.parts[myID] = part;
+}
+//Do not use
+Davkovac.prototype.update = function () {
+    if (this.actual) {
+	return;
     }
-
-    Davkovac.prototype.addSon = function (myID, fatherID, zarobok, meno, datumUz, prog, datumKon) {
-        if (myID != this.mainPart) {
-            part = {
-                datumUzavretia:datumUz,
-                program: prog,
-                datumKoncaZmluvy: datumKon,
-                id:myID,
-                parent: fatherID,
-                text: {
-                    name: zarobok,
-                    title: meno,
-                }
-            }
-        }
-        else {
-            part = {
-                id:myID,
-                text: {
-                    collapsed: true,
-                    title: meno,
-                }
-            }
-        }
-        this.parts[myID] = part;
-        this.showing[myID] = 0;
+    this.actual = true;
+    //update parents
+    var self = this;
+    this.parts.forEach(function (part) {
+	if (part.id!= self.mainPart) {
+	    part.parent = self.parts[part.parent];
+	    part.parent.sons.push(part);
+	    part.otec = part.parent;
+	}
+    })
+}
+//vrati syna s tou ID
+Davkovac.prototype.getSon = function (id) {
+    return this.parts[id];
+}
+//Prepne otcovi (jehoID) vramci Davkovaca na dalsich X (definovane v konstruktore Davkovaca = 5) synov
+Davkovac.prototype.nextSons = function (fatherID) {
+    var father = this.getSon(fatherID);
+    if (father.sons.length - (father.showing + 1) * this.displayNumber > 0) {
+	father.showing = father.showing + 1;
     }
-
-    Davkovac.prototype.updateNumber = function () {
-        var iterator = this.parts.keys()
-        var iter = iterator.next()
-        while (!iter.done) {
-            var part = this.getSon(iter.value);
-            if (part != undefined) {
-                this.numberOfSons[iter.value] = this.numberOfHisSons(part);
-            }
-            iter = iterator.next();
-        }
-        return this;
+    else {
+	father.showing = 0;
     }
-
-    Davkovac.prototype.numberOfHisSons = function (compare) {
-        var pocet = 0;
-        var iterator = this.parts.keys()
-        var iter = iterator.next()
-        while (!iter.done) {
-            var part = this.getSon(iter.value);
-            if (part != undefined) {
-                if (part.parent == compare) {
-                    pocet++;
-                }
-            }
-            iter = iterator.next();
-        }
-
-        return pocet;
+}
+//Do not use
+Davkovac.prototype.uncollapse = function () {
+    this.parts[this.mainPart].collapsed = false;
+    if (this.clicked == this.mainPart) {
+	return;
     }
-
-    Davkovac.prototype.getSon = function (id) {
-        return this.parts[id];
+    nextParent=this.parts[this.clicked];
+    while (nextParent != this.parts[this.mainPart]) {
+	nextParent.collapsed = false;
+	nextParent = nextParent.parent;
     }
-
-    Davkovac.prototype.nextSons = function (fatherID) {
-        var father = this.getSon(fatherID);
-        if (this.numberOfSons[fatherID] - (this.showing[fatherID] + 1) * this.displayNumber > 0) {
-            this.showing[fatherID] = this.showing[fatherID] + 1;
-        }
-        else {
-            this.showing[fatherID] = 0;
-        }
+}
+//Do not use
+Davkovac.prototype.novaStrukturasMaximom = function () {
+    var result = [];
+    var prechadzam = [this.parts[this.mainPart]];
+    var budemPrechadzat = [];
+    var self = this;
+    while (prechadzam.length != 0&&result.length<this.maxShow) {
+	budemPrechadzat = [];
+	prechadzam.forEach(function (part) {
+	    if (part.sons.length != 0) {
+		part.collapsed = true;
+	    }
+	    for (var i = self.displayNumber * part.showing; i < self.displayNumber * part.showing + self.displayNumber && i < part.sons.length; i++) {
+		result.push(part.sons[i]);
+		budemPrechadzat.push(part.sons[i]);
+	    }
+	});
+	prechadzam = budemPrechadzat;
     }
+    prechadzam.forEach(function (part) {
+	if (part.sons.length > 0) {
+	    part.collapsed = true;
+	}
+    })
+    return result;
+}
 
-    Davkovac.prototype.getParents = function () {
-        var result = [];
-        var iterator = this.parts.keys();
-        var iter = iterator.next();
-        while (!iter.done) {
-            var part = this.getSon(iter.value);
-            if (part != undefined && part != this.getSon(this.mainPart)) {
-                if (result[this.parts.indexOf(part.parent)] == undefined) {
-                    result[this.parts.indexOf(part.parent)] = [];
-                }
-                result[this.parts.indexOf(part.parent)].push(part);
-            }
-            iter = iterator.next();
-        }
-        return this.stripSons(result);
-        //return result;
+//Vrati true ak su zobrazeni synovia osoby s ID
+Davkovac.prototype.ZobrazeniSynovia = function (hladaneID) {
+    for (var i = 1; i < this.currentTree.length;i++){
+	if (hladaneID==this.currentTree[i].parentID) {
+	    return true;
+	}
     }
+    return false;
+}
 
-    Davkovac.prototype.stripSons = function (fatherField) {
-        var result = [];
-        var iterator = fatherField.keys();
-        var iter = iterator.next();
-        var selected = 0;
-        while (!iter.done) {
-            var part = fatherField[iter.value];
-            if (part != undefined) {
-                this.parts[iter.value].collapsed = true;
+//Do not use
+Davkovac.prototype.toDepthFirst = function (vyberaciePole) {
 
-                result[iter.value] = [];
-                selected = 0;
-                var next = fatherField[iter.value][selected + this.showing[iter.value] * this.displayNumber];
-                while (!(selected == this.displayNumber || next == undefined)) {
-                    result[iter.value][selected] = next;
-                    selected++;
-                    next = fatherField[iter.value][selected + this.showing[iter.value] * this.displayNumber];
-                }
-            }
-            iter = iterator.next();
-        }
-        return this.stripFathers(result);
+    var result = [vyberaciePole[0]];
+    var index = 0;
+    var i = 1;
+    var vybranyOtec;
+    while (result.length != vyberaciePole.length) {
+	vybranyOtec = result[index];
+	i = 1;
+	vyberaciePole.forEach(function (prvok) {
+	    if(prvok!=result[0]){
+		if (prvok.parentID == vybranyOtec.id) {
+		    result.splice(index+i,0,prvok);
+		    i++;
+		}
+	    }
+	})
+	index++;
     }
-
-    Davkovac.prototype.uncollapse = function (resArray) {
-        if (this.clicked == this.mainPart) {
-            return resArray;
-        }
-        nextParent=this.parts[this.clicked];
-        while (nextParent != this.parts[this.mainPart]) {
-            resArray[resArray.indexOf(nextParent)].collapsed = false;
-            nextParent = nextParent.parent;
-        }
-        return resArray;
-    }
-
-    Davkovac.prototype.stripFathers = function (fatherField) {
-        var self = this;
-        var stripFathers1 = function (fatherField, part) {
+    return result;
+}
+        //Vola sa pri kontrukcii. Je to strom do takej hlbky, ktora je tesne nad 1000 prvkov. (this.maxShow)
+        Davkovac.prototype.createFirstTree = function () {
+            this.update();
             var result = [];
-            fatherField[part].forEach(function(item) {
-                result.push(item);
-                var newPart = self.parts.indexOf(item);
-                if (fatherField[newPart] != undefined) {
-                    result = result.concat(stripFathers1(fatherField, newPart));
-                }
-            });
+            result.push(this.config);
+            this.currentTree = this.toDepthFirst([this.parts[this.mainPart]].concat(this.novaStrukturasMaximom()));
+            result = result.concat(this.currentTree);
             return result;
         }
-        return stripFathers1(fatherField, this.mainPart);
-    }
-
-    Davkovac.prototype.createTree = function () {
-
-        var result = [];
-        result.push(this.config);
-        result.push(this.parts[this.mainPart]);
-        result = result.concat(this.uncollapse(this.getParents()));
-        this.createUsedID(result);
-        return result;
-    }
-
-    Davkovac.prototype.createUsedID=function(pole){
-        this.usedID = [];
-        for (i = 1; i < pole.length; i++) {
-            this.usedID[i-1]=pole[i].id;
-        }
-    }
-
-    Davkovac.prototype.updateParents = function () {
-        var self = this;
-        this.parts.forEach(function (part) {
-            if (part.parent != undefined) {
-                part.parent = self.parts[part.parent];
+        //Pri leftclicku na syna ktory nema nacitanych synov, vracia novy strom aj s jeho synami
+        Davkovac.prototype.extendTree = function (id) {
+            var result=this.currentTree
+            var part = this.getSon(id);
+            for (var i = this.displayNumber * part.showing; i < this.displayNumber * part.showing + this.displayNumber && i < part.sons.length; i++) {
+                result.push(part.sons[i]);
+                if (part.sons[i].sons.length > 0) {
+                    part.sons[i].collapsed = true;
+                }
             }
-        })
-        return this;
+            this.currentTree = this.toDepthFirst(result);
+            return [this.config].concat(this.currentTree);
+        }
+        //Do not use
+        Davkovac.prototype.novaStrukturaPoZmeneSynov= function (IDZmeny) {
+            var result = [];
+            var prechadzam = [this.parts[this.mainPart]];
+            var budemPrechadzat = [];
+            var self = this;
+            while (prechadzam.length != 0) {
+	budemPrechadzat = [];
+	prechadzam.forEach(function (part) {
+	    if (part.parentID == IDZmeny && part.sons.length > 0 && part.collapsed==undefined) {
+		part.collapsed=true;
+	    }
+	    if (part.collapsed == false) {                    
+		for (var i = self.displayNumber * part.showing; i < self.displayNumber * part.showing + self.displayNumber && i < part.sons.length; i++) {
+		    result.push(part.sons[i]);
+		    budemPrechadzat.push(part.sons[i]);
+		}
+	    }
+	});
+
+	prechadzam = budemPrechadzat;
     }
+    return result;
+}
+//Vola sa ked sa prepnu synovia s ID clickuteho... ID musi byt ID v Davkovaci!
+Davkovac.prototype.createChangedTree = function (IDZmeny) {
+    this.update();
+    var result = [];
+    result.push(this.config);
+    this.currentTree = this.toDepthFirst([this.parts[this.mainPart]].concat(this.novaStrukturaPoZmeneSynov(IDZmeny)));
+    result = result.concat(this.currentTree);
+    return result;
+}
+//Pri klicku treba nastavit danemu prvku vlastnost collaped=false/true ak ma synov (prvok.sons.length>0)
+//NOVINKA!! data prvku sa daju ziskat z this.currentTree podla id v treante
+  
 
     var davkovac = null;
 
@@ -1805,6 +1804,15 @@
                         			if (self.getTreeConfig().callback.onBeforeClickCollapseSwitch.apply(self, [nodeSwitch, e]) === false) {
                             				return false;
                        				}
+											if ( davkovac.currentTree[self.id].sons.length > 0 ) {
+												if ( davkovac.currentTree[self.id].collapsed ) {
+													davkovac.currentTree[self.id].collapsed = false;
+												} else {
+													davkovac.currentTree[self.id].collapsed = true;												
+												}
+											}                  				
+                       				
+                       				
                         			self.toggleCollapse();
                         			self.getTreeConfig().callback.onAfterClickCollapseSwitch.apply(self, [nodeSwitch, e]);
                     			}	
@@ -1813,26 +1821,22 @@
         	},
 
 		addRightClickEvents: function ( nodeEl ) {
-			//TODO: pri update noveho davkovaca prerobit na vykresovanie podla ID.
-			//TODO: nastavit davkovac.clicked
-			//BUG: chrome nefunguje preventdefault()
+			//TODO: pri update noveho Davkovaca prerobit na vykresovanie podla ID.
+			//TODO: nastavit Davkovac.clicked
 			var self = this;
-
 			UTIL.addEvent(nodeEl, 'contextmenu',
 				function (e) {
        		   	        	e.preventDefault();
                     			if (e.which == 3) {
-                   				if ( self.infoBox != undefined ) {
+                   				if ( self.infoBox != null ) {
 			                       		self.infoBox.parentElement.removeChild(self.infoBox);
 						}
                 
-						//var id = davkovac.usedID[self.id];
-			                        //davkovac.clicked = id;
-                        			//davkovac.nextSons(id);
-			                        //console.log(id);
-                        			//treant.jsonStructure = JSONconfig.make(davkovac.createTreeByID(id));
-			                        //treant.jsonStructure = JSONconfig.make(davkovac.createTree());
-                        			treant.tree.reload();
+						var id = davkovac.currentTree[self.id].id;
+			                        //davkovac.nextSons(id);
+			                        //treant.destoy;
+			                        //treant.tree.initJsonConfig = JSONconfig.make(davkovac.createChangedTree(id));
+			                        treant.tree.reload();
                        			}
            			}
 			);
@@ -1842,9 +1846,9 @@
 			var self = this;
 			UTIL.addEvent( nodeEl, 'mouseenter',
 				function( e ) {
-                    			var davkovacID = davkovac.usedID[self.id];
-                    			if (davkovacID != davkovac.mainPart) {
-                        			self.infoBox = self.createInfoBox(e, davkovac.getSon(davkovacID));
+									                    			
+                    			if (davkovac.currentTree[self.id].id != davkovac.mainPart) {
+                        			self.infoBox = self.createInfoBox(e, davkovac.currentTree[self.id]);
                     			}
 				}
 			);
@@ -2390,24 +2394,20 @@
         config.forEach(function(item) {
             davkovac.addSon(item[0], item[1], item[2], item[3], item[4], item[5], item[6]);
         });
-        davkovac.updateParents().updateNumber();
 
-        var jsonConfig = JSONconfig.make( davkovac.createTree() );
+        var jsonConfig = JSONconfig.make( davkovac.createFirstTree());
 
 		// optional
 		if ( jQuery ) {
 			$ = jQuery;
 		}
-
 		this.tree = TreeStore.createTree( jsonConfig );
 		this.tree.positionTree( callback );
 	};
-
 	Treant.prototype.destroy = function() {
 		TreeStore.destroy( this.tree.id );
-        davkovac = null;
+       // davkovac = null;
 	};
-
 	/* expose constructor globally */
 	window.Treant = Treant;
 
