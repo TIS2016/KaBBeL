@@ -25,18 +25,17 @@
     this.currentTree = [];
     this.maxShow=1000;
     this.config = {
-	container: "#collapsable-example",
-	animateOnInit: false,
-
-	node: {
-	    collapsable: true
-	},
-	animation: {
-	    nodeAnimation: "easeOutBounce",
-	    nodeSpeed: 0, //450
-	    connectorsAnimation: "bounce",
-	    connectorsSpeed: 0 //450
-	}
+		container: "#collapsable-example",
+		animateOnInit: false,
+		node: {
+		    collapsable: true
+		},
+		animation: {
+	    	nodeAnimation: "easeOutBounce",
+	    	nodeSpeed: 450,
+	    	connectorsAnimation: "bounce",
+	    	connectorsSpeed: 450
+		}
     }
     this.addSon(id, id,"Ja", 0,null,null,null);
 }
@@ -100,6 +99,7 @@ Davkovac.prototype.nextSons = function (fatherID) {
     var father = this.getSon(fatherID);
     if (father.sons.length - (father.showing + 1) * this.displayNumber > 0) {
 	father.showing = father.showing + 1;
+	this.actual = false;
     }
     else {
 	father.showing = 0;
@@ -1826,21 +1826,23 @@ Davkovac.prototype.createChangedTree = function (IDZmeny) {
 			var self = this;
 			UTIL.addEvent(nodeEl, 'contextmenu',
 				function (e) {
-       		   	        	e.preventDefault();
-                    			if (e.which == 3) {
-                   				if ( self.infoBox != null ) {
-			                       		self.infoBox.parentElement.removeChild(self.infoBox);
-						}
-                
-						var id = davkovac.currentTree[self.id].id;
-			                        //davkovac.nextSons(id);
-			                        //treant.destoy;
-			                        //treant.tree.initJsonConfig = JSONconfig.make(davkovac.createChangedTree(id));
-			                        treant.tree.reload();
-                       			}
-           			}
+					e.preventDefault();
+                    	if (e.which == 3) {
+                   			if ( self.infoBox != null ) {
+			               		self.infoBox.parentElement.removeChild(self.infoBox);
+							}
+							var id, newInitTree;
+							id = davkovac.currentTree[self.id].id;
+                            davkovac.nextSons(id);
+							newInitTree = JdSONconfig.make(davkovac.createChangedTree(id));
+                            treant.destroy();
+                            treant.tree = TreeStore.createTree(newInitTree);
+                   			treant.tree.positionTree(function () {});
+                   			treant.tree.reload();
+                   	}
+        		}
 			);
-       		},
+       	},
 
 		addHoverEvents: function( nodeEl ) {
 			var self = this;
@@ -2394,10 +2396,7 @@ Davkovac.prototype.createChangedTree = function (IDZmeny) {
         config.forEach(function(item) {
             davkovac.addSon(item[0], item[1], item[2], item[3], item[4], item[5], item[6]);
         });
-
-        var jsonConfig = JSONconfig.make( davkovac.createFirstTree());
-
-		// optional
+        var jsonConfig = JSONconfig.make( davkovac.createFirstTree() );
 		if ( jQuery ) {
 			$ = jQuery;
 		}
