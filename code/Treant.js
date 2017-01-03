@@ -141,7 +141,7 @@
 	    	return result;
 	}
 	//Vrati true ak su zobrazeni synovia osoby s ID
-	Davkovac.prototype.ZobrazeniSynovia = function (hladaneID) {
+	Davkovac.prototype.zobrazeniSynovia = function (hladaneID) {
 	    	for (var i = 1; i < this.currentTree.length;i++){
 			if (hladaneID==this.currentTree[i].parentID) {
 		    	return true;
@@ -1800,11 +1800,22 @@
                         			if (self.getTreeConfig().callback.onBeforeClickCollapseSwitch.apply(self, [nodeSwitch, e]) === false) {
                             				return false;
                        				}
+
 						if ( davkovac.currentTree[self.id].sons.length > 0 ) {
 							if ( davkovac.currentTree[self.id].collapsed ) {
 								davkovac.currentTree[self.id].collapsed = false;
-							} else {
-								davkovac.currentTree[self.id].collapsed = true;												
+                                				if (davkovac.currentTree[self.id].children.length > 0) {
+                                					var id0 = davkovac.currentTree[self.id].id;
+									if (!davkovac.zobrazeniSynovia(id0)) {
+                                					        if (self.infoBox != undefined) {
+                                           						self.infoBox.parentElement.removeChild(self.infoBox);
+                                        					}
+                                        					treant.updateWithNewData(davkovac.extendTree(id0));
+									}
+                                				}
+
+                            				} else {
+			    	    				davkovac.currentTree[self.id].collapsed = true;
 							}
 						}                  				
                         			self.toggleCollapse();
@@ -1826,12 +1837,8 @@
 		                	            	var id, newInitTree;
         			                    	id = davkovac.currentTree[self.id].id;
                         			    	davkovac.nextSons(id);
-		                            		TreeStore.remove();
-                		            		newInitTree = JSONconfig.make(davkovac.createChangedTree(id));
-	                    				treant.destroy();
-							treant.tree = TreeStore.createTree(newInitTree);
-							treant.tree.reload();
-						}
+                        			    	treant.updateWithNewData(davkovac.createChangedTree(id));
+		                    	}
         			}
 			);
        		},
@@ -1840,7 +1847,7 @@
 			var self = this;
 			UTIL.addEvent( nodeEl, 'mouseenter',
 				function( e ) {
-		               			
+		               			console.log(self.id);
                     			if (davkovac.currentTree[self.id].id != davkovac.mainPart) {
                         			self.infoBox = self.createInfoBox(e, davkovac.currentTree[self.id]);
                     			}
@@ -2391,10 +2398,19 @@
 		this.tree = TreeStore.createTree( jsonConfig );
 		this.tree.positionTree( callback );
 	};
+	
 	Treant.prototype.destroy = function() {
 		TreeStore.destroy( this.tree.id );
 		this.tree = null;
        	};
+	
+	Treant.prototype.updateWithNewData = function (data) {
+        	TreeStore.remove();
+        	newInitTree = JSONconfig.make(data);
+        	treant.destroy();
+        	treant.tree = TreeStore.createTree(newInitTree);
+        	treant.tree.reload();
+   	};
 	/* expose constructor globally */
 	window.Treant = Treant;
 })();
