@@ -23,7 +23,7 @@
     		this.actual = false;
     		this.parts = [];
     		this.currentTree = [];
-    		this.maxShow=1000;
+    		this.maxShow=1;
     		this.config = {
 			container: "#collapsable-example",
 			animateOnInit: false,
@@ -1804,7 +1804,7 @@
 						if ( davkovac.currentTree[self.id].sons.length > 0 ) {
 							if ( davkovac.currentTree[self.id].collapsed ) {
 								davkovac.currentTree[self.id].collapsed = false;
-                                				if (davkovac.currentTree[self.id].children.length > 0) {
+                                				if (davkovac.currentTree[self.id].sons.length > 0) {
                                 					var id0 = davkovac.currentTree[self.id].id;
 									if (!davkovac.zobrazeniSynovia(id0)) {
                                 					        if (self.infoBox != undefined) {
@@ -1847,7 +1847,7 @@
 			var self = this;
 			UTIL.addEvent( nodeEl, 'mouseenter',
 				function( e ) {
-		               			console.log(self.id);
+					//console.log(self.id);
                     			if (davkovac.currentTree[self.id].id != davkovac.mainPart) {
                         			self.infoBox = self.createInfoBox(e, davkovac.currentTree[self.id]);
                     			}
@@ -2332,8 +2332,8 @@
 
 		findChildren: function(nodes) {
 			var parents = [0]; // start with a a root node
-			console.log("HERE");
-			console.log(nodes.length);
+			//console.log("HERE");
+			//console.log(nodes.length);
 			while(parents.length) {
 				var parentId = parents.pop(),
 				parent = this.findNode(this.jsonStructure.nodeStructure, parentId),
