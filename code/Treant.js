@@ -19,7 +19,7 @@
     	var Davkovac = function(id) {
     		this.mainPart = id;
     		this.clicked = id;
-    		this.displayNumber = 5;
+    		this.displayNumber = 1000;
     		this.actual = false;
     		this.parts = [];
     		this.currentTree = [];
