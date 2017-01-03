@@ -385,8 +385,10 @@
         var simpleStruktura = simpleGeneracia(40000);
         console.log("DONE");*/
 			//myID, fatherID, meno,zarobok, datumUz, prog, datumKon
+
+		
         var config = [
-            [0, 0, "Ja", 5, null, null, null],
+            [0],
             [ 1, 0, "nom1", 5, "HOVNo", "1.1.1020", "2.20.1203"],
             [ 2, 0, "nom2", 5, "aaa", null, null],
             [ 3,  0, "XXXX1", 5, "sadsd", null, null],
@@ -409,6 +411,31 @@
             [20,  5, "XXXs3", 5, null, null, null],
             [21,  5, "XXXs3", 5, null, null, null],
 
+        ]
+		        var config = [
+			[10],
+			[1, 10,"a1", 12, null, null, null],
+			[2, 10,"a2",12, null, null, null],
+			[4, 10,"a3",12, null, null, null],
+			[41, 10, "a4", 12, null, null, null],
+			[42, 10, "a5", 12, null, null, null],
+			[43, 10, "a6", 12, null, null, null],
+			[44, 10, "a7", 12, null, null, null],
+			[45, 10, "a8", 12, null, null, null],
+			[46, 10, "a9", 12, null, null, null],
+			[146, 46, "X9", 12, null, null, null],
+			[47, 10, "a10", 12, null, null, null],
+			[48, 10, "a11", 12, null, null, null],
+			[49, 10, "a12", 12, null, null, null],
+			[50, 10, "a13", 12, null, null, null],
+			[3, 2, "b1", 12, null, null, null],
+			[5, 2, "b2", 12, null, null, null],
+			[6, 2, "b3", 12, null, null, null],
+			[7, 6, "c1", 12, null, null, null],
+			[100, 6, "c2", 12, null, null, null],
+			[8, 7, "d1", 12, null, null, null],
+			[9, 8, "e1", 12, null, null, null],
+			[14, 9, "f1", 12, null, null, null],
         ]
         var treant = new Treant(config, function() {}, $);
     </script>
