@@ -19,7 +19,7 @@
     	var Davkovac = function(id) {
     		this.mainPart = id;
     		this.clicked = id;
-    		this.displayNumber = 1000;
+    		this.displayNumber = 6;
     		this.actual = false;
     		this.parts = [];
     		this.currentTree = [];
@@ -1834,11 +1834,13 @@
                         				if (self.infoBox != undefined) {
                                 				self.infoBox.parentElement.removeChild(self.infoBox);
                             				}
-		                	            	var id, newInitTree;
-        			                    	id = davkovac.currentTree[self.id].id;
-                        			    	davkovac.nextSons(id);
-                        			    	treant.updateWithNewData(davkovac.createChangedTree(id));
-		                    	}
+                            				if (davkovac.currentTree[self.id].sons.length > 0 && davkovac.currentTree[self.id].sons.length > davkovac.displayNumber) {
+                                                		var id, newInitTree;
+                                                		id = davkovac.currentTree[self.id].id;
+                                                		davkovac.nextSons(id);
+                                                		treant.updateWithNewData(davkovac.createChangedTree(id));
+                                            		}
+                        			}
         			}
 			);
        		},
