@@ -16,226 +16,218 @@
 
 ;(function(){
 
-    var Davkovac = function(id) {
-    this.mainPart = id;
-    this.clicked = id;
-    this.displayNumber = 5;
-    this.actual = false;
-    this.parts = [];
-    this.currentTree = [];
-    this.maxShow=1000;
-    this.config = {
-		container: "#collapsable-example",
-		animateOnInit: false,
-		node: {
-		    collapsable: true
-		},
-		animation: {
-	    	nodeAnimation: "easeOutBounce",
-	    	nodeSpeed: 450,
-	    	connectorsAnimation: "bounce",
-	    	connectorsSpeed: 450
+    	var Davkovac = function(id) {
+    		this.mainPart = id;
+    		this.clicked = id;
+    		this.displayNumber = 5;
+    		this.actual = false;
+    		this.parts = [];
+    		this.currentTree = [];
+    		this.maxShow=1000;
+    		this.config = {
+			container: "#collapsable-example",
+			animateOnInit: false,
+			node: {
+				collapsable: true
+			},
+			animation: {
+	    			nodeAnimation: "easeOutBounce",
+	    			nodeSpeed: 450,
+	    			connectorsAnimation: "bounce",
+	    			connectorsSpeed: 450
+			}
 		}
-    }
-    this.addSon(id, id,"Ja", 0,null,null,null);
-}
+   		this.addSon(id, id,"Ja", 0,null,null,null);
+	}
 
-//Prida syna do Davkovaca a struktury
-Davkovac.prototype.addSon = function (myID, fatherID, meno,zarobok, datumUz, prog, datumKon) {
-    if (myID != this.mainPart) {
-	part = {
-	    datumUzavretia:datumUz,
-	    program: prog,
-	    datumKoncaZmluvy: datumKon,
-	    showing: 0,
-	    id:myID,
-	    sons: [],
-	    parent: fatherID,
-	    otec:null,
-	    parentID: fatherID,
-	    hlbka:0,
-	    text: {
-		name: meno,
-		title: zarobok,
-	    }                    
+	//Prida syna do Davkovaca a struktury
+	Davkovac.prototype.addSon = function (myID, fatherID, meno,zarobok, datumUz, prog, datumKon) {
+		if (myID != this.mainPart) {
+			part = {
+				datumUzavretia:datumUz,
+				program: prog,
+			    	datumKoncaZmluvy: datumKon,
+				showing: 0,
+				id:myID,
+				sons: [],
+				parent: fatherID,
+			    	otec:null,
+				parentID: fatherID,
+				hlbka:0,
+			    	text: {
+					name: meno,
+					title: zarobok,
+			    	}                    
+				}
+		} else {
+			part = {
+				showing: 0,
+			    	id: myID,
+			    	sons:[],
+			    	collapsed: true,
+			    	hlbka: 0,
+			    	text: {
+					name: meno,
+			    	}
+			}
+	    	}
+	    	this.parts[myID] = part;
 	}
-    }
-    else {
-	part = {
-	    showing: 0,
-	    id: myID,
-	    sons:[],
-	    collapsed: true,
-	    hlbka: 0,
-	    text: {
-		name: meno,
-	    }
+	//Do not use
+	Davkovac.prototype.update = function () {
+ 		if (this.actual) {
+			return;
+	   	}
+		this.actual = true;
+		//update parents
+	    	var self = this;
+	    	this.parts.forEach(function (part) {
+			if (part.id!= self.mainPart) {
+		    		part.parent = self.parts[part.parent];
+				part.parent.sons.push(part);
+		    		part.otec = part.parent;
+			}
+    		})
 	}
-    }
-    this.parts[myID] = part;
-}
-//Do not use
-Davkovac.prototype.update = function () {
-    if (this.actual) {
-	return;
-    }
-    this.actual = true;
-    //update parents
-    var self = this;
-    this.parts.forEach(function (part) {
-	if (part.id!= self.mainPart) {
-	    part.parent = self.parts[part.parent];
-	    part.parent.sons.push(part);
-	    part.otec = part.parent;
+	//vrati syna s tou ID
+	Davkovac.prototype.getSon = function (id) {
+		return this.parts[id];
 	}
-    })
-}
-//vrati syna s tou ID
-Davkovac.prototype.getSon = function (id) {
-    return this.parts[id];
-}
-//Prepne otcovi (jehoID) vramci Davkovaca na dalsich X (definovane v konstruktore Davkovaca = 5) synov
-Davkovac.prototype.nextSons = function (fatherID) {
-    var father = this.getSon(fatherID);
-    if (father.sons.length - (father.showing + 1) * this.displayNumber > 0) {
-	father.showing = father.showing + 1;
-	this.actual = false;
-    }
-    else {
-	father.showing = 0;
-    }
-}
-//Do not use
-Davkovac.prototype.uncollapse = function () {
-    this.parts[this.mainPart].collapsed = false;
-    if (this.clicked == this.mainPart) {
-	return;
-    }
-    nextParent=this.parts[this.clicked];
-    while (nextParent != this.parts[this.mainPart]) {
-	nextParent.collapsed = false;
-	nextParent = nextParent.parent;
-    }
-}
-//Do not use
-Davkovac.prototype.novaStrukturasMaximom = function () {
-    var result = [];
-    var prechadzam = [this.parts[this.mainPart]];
-    var budemPrechadzat = [];
-    var self = this;
-    while (prechadzam.length != 0&&result.length<this.maxShow) {
-	budemPrechadzat = [];
-	prechadzam.forEach(function (part) {
-	    if (part.sons.length != 0) {
-		part.collapsed = true;
-	    }
-	    for (var i = self.displayNumber * part.showing; i < self.displayNumber * part.showing + self.displayNumber && i < part.sons.length; i++) {
-		result.push(part.sons[i]);
-		budemPrechadzat.push(part.sons[i]);
-	    }
-	});
-	prechadzam = budemPrechadzat;
-    }
-    prechadzam.forEach(function (part) {
-	if (part.sons.length > 0) {
-	    part.collapsed = true;
+	//Prepne otcovi (jehoID) vramci Davkovaca na dalsich X (definovane v konstruktore Davkovaca = 5) synov
+	Davkovac.prototype.nextSons = function (fatherID) {
+		var father = this.getSon(fatherID);
+		if (father.sons.length - (father.showing + 1) * this.displayNumber > 0) {
+			father.showing = father.showing + 1;
+		} else {
+			father.showing = 0;
+	    	}
 	}
-    })
-    return result;
-}
-
-//Vrati true ak su zobrazeni synovia osoby s ID
-Davkovac.prototype.ZobrazeniSynovia = function (hladaneID) {
-    for (var i = 1; i < this.currentTree.length;i++){
-	if (hladaneID==this.currentTree[i].parentID) {
-	    return true;
+	//Do not use
+	Davkovac.prototype.uncollapse = function () {
+	    	this.parts[this.mainPart].collapsed = false;
+	    	if (this.clicked == this.mainPart) {
+			return;
+    		}
+	    	nextParent=this.parts[this.clicked];
+	    	while (nextParent != this.parts[this.mainPart]) {
+			nextParent.collapsed = false;
+			nextParent = nextParent.parent;
+	    	}
 	}
-    }
-    return false;
-}
-
-//Do not use
-Davkovac.prototype.toDepthFirst = function (vyberaciePole) {
-
-    var result = [vyberaciePole[0]];
-    var index = 0;
-    var i = 1;
-    var vybranyOtec;
-    while (result.length != vyberaciePole.length) {
-	vybranyOtec = result[index];
-	i = 1;
-	vyberaciePole.forEach(function (prvok) {
-	    if(prvok!=result[0]){
-		if (prvok.parentID == vybranyOtec.id) {
-		    result.splice(index+i,0,prvok);
-		    i++;
-		}
-	    }
-	})
-	index++;
-    }
-    return result;
-}
-        //Vola sa pri kontrukcii. Je to strom do takej hlbky, ktora je tesne nad 1000 prvkov. (this.maxShow)
-        Davkovac.prototype.createFirstTree = function () {
-            this.update();
-            var result = [];
-            result.push(this.config);
-            this.currentTree = this.toDepthFirst([this.parts[this.mainPart]].concat(this.novaStrukturasMaximom()));
-            result = result.concat(this.currentTree);
-            return result;
-        }
+	//Do not use
+	Davkovac.prototype.novaStrukturasMaximom = function () {
+	    	var result = [];
+	    	var prechadzam = [this.parts[this.mainPart]];
+	    	var budemPrechadzat = [];
+	    	var self = this;
+	    	while (prechadzam.length != 0&&result.length<this.maxShow) {
+			budemPrechadzat = [];
+			prechadzam.forEach(function (part) {
+		    		if (part.sons.length != 0) {
+					part.collapsed = true;
+		    		}
+		    		for (var i = self.displayNumber * part.showing; i < self.displayNumber * part.showing + self.displayNumber && i < part.sons.length; i++) {
+					result.push(part.sons[i]);
+					budemPrechadzat.push(part.sons[i]);
+		    		}
+			});
+			prechadzam = budemPrechadzat;
+	    	}
+	    	prechadzam.forEach(function (part) {
+			if (part.sons.length > 0) {
+			    	part.collapsed = true;
+			}
+	    	})
+	    	return result;
+	}
+	//Vrati true ak su zobrazeni synovia osoby s ID
+	Davkovac.prototype.ZobrazeniSynovia = function (hladaneID) {
+	    	for (var i = 1; i < this.currentTree.length;i++){
+			if (hladaneID==this.currentTree[i].parentID) {
+		    	return true;
+			}
+	    	}
+	    	return false;
+	}
+	//Do not use
+	Davkovac.prototype.toDepthFirst = function (vyberaciePole) {
+	    	var result = [vyberaciePole[0]];
+	    	var index = 0;
+	    	var i = 1;
+    		var vybranyOtec;
+	    	while (result.length != vyberaciePole.length) {
+			vybranyOtec = result[index];
+			i = 1;
+			vyberaciePole.forEach(function (prvok) {
+		    		if(prvok!=result[0]){
+					if (prvok.parentID == vybranyOtec.id) {
+			    			result.splice(index+i,0,prvok);
+			    			i++;
+					}
+		    		}
+			})
+			index++;
+	    	}
+	    	return result;
+	}
+	//Vola sa pri kontrukcii. Je to strom do takej hlbky, ktora je tesne nad 1000 prvkov. (this.maxShow)
+	Davkovac.prototype.createFirstTree = function () {
+		this.update();
+	        var result = [];
+	        result.push(this.config);
+	        this.currentTree = this.toDepthFirst([this.parts[this.mainPart]].concat(this.novaStrukturasMaximom()));
+	        result = result.concat(this.currentTree);
+	        return result;
+	}
         //Pri leftclicku na syna ktory nema nacitanych synov, vracia novy strom aj s jeho synami
         Davkovac.prototype.extendTree = function (id) {
-            var result=this.currentTree
-            var part = this.getSon(id);
-            for (var i = this.displayNumber * part.showing; i < this.displayNumber * part.showing + this.displayNumber && i < part.sons.length; i++) {
-                result.push(part.sons[i]);
-                if (part.sons[i].sons.length > 0) {
-                    part.sons[i].collapsed = true;
-                }
-            }
-            this.currentTree = this.toDepthFirst(result);
-            return [this.config].concat(this.currentTree);
+            	var result=this.currentTree
+            	var part = this.getSon(id);
+            	for (var i = this.displayNumber * part.showing; i < this.displayNumber * part.showing + this.displayNumber && i < part.sons.length; i++) {
+                	result.push(part.sons[i]);
+                	if (part.sons[i].sons.length > 0) {
+                	    	part.sons[i].collapsed = true;
+                	}
+            	}
+            	this.currentTree = this.toDepthFirst(result);
+        	return [this.config].concat(this.currentTree);
         }
         //Do not use
         Davkovac.prototype.novaStrukturaPoZmeneSynov= function (IDZmeny) {
-            var result = [];
-            var prechadzam = [this.parts[this.mainPart]];
-            var budemPrechadzat = [];
-            var self = this;
-            while (prechadzam.length != 0) {
-	budemPrechadzat = [];
-	prechadzam.forEach(function (part) {
-	    if (part.parentID == IDZmeny && part.sons.length > 0 && part.collapsed==undefined) {
-		part.collapsed=true;
-	    }
-	    if (part.collapsed == false) {                    
-		for (var i = self.displayNumber * part.showing; i < self.displayNumber * part.showing + self.displayNumber && i < part.sons.length; i++) {
-		    result.push(part.sons[i]);
-		    budemPrechadzat.push(part.sons[i]);
-		}
-	    }
-	});
-
-	prechadzam = budemPrechadzat;
-    }
-    return result;
-}
-//Vola sa ked sa prepnu synovia s ID clickuteho... ID musi byt ID v Davkovaci!
-Davkovac.prototype.createChangedTree = function (IDZmeny) {
-    this.update();
-    var result = [];
-    result.push(this.config);
-    this.currentTree = this.toDepthFirst([this.parts[this.mainPart]].concat(this.novaStrukturaPoZmeneSynov(IDZmeny)));
-    result = result.concat(this.currentTree);
-    return result;
-}
-//Pri klicku treba nastavit danemu prvku vlastnost collaped=false/true ak ma synov (prvok.sons.length>0)
-//NOVINKA!! data prvku sa daju ziskat z this.currentTree podla id v treante
+            	var result = [];
+            	var prechadzam = [this.parts[this.mainPart]];
+            	var budemPrechadzat = [];
+            	var self = this;
+            	while (prechadzam.length != 0) {
+			budemPrechadzat = [];
+			prechadzam.forEach(function (part) {
+		    		if (part.parentID == IDZmeny && part.sons.length > 0 && part.collapsed==undefined) {
+					part.collapsed=true;
+	    			}
+	    			if (part.collapsed == false) {                    
+					for (var i = self.displayNumber * part.showing; i < self.displayNumber * part.showing + self.displayNumber && i < part.sons.length; i++) {
+		    				result.push(part.sons[i]);
+		    				budemPrechadzat.push(part.sons[i]);
+					}
+	    			}
+			});
+			prechadzam = budemPrechadzat;
+    		}	
+    		return result;
+	}
+	//Vola sa ked sa prepnu synovia s ID clickuteho... ID musi byt ID v Davkovaci!
+	Davkovac.prototype.createChangedTree = function (IDZmeny) {
+    		this.update();
+	    	var result = [];
+	    	result.push(this.config);
+	    	this.currentTree = this.toDepthFirst([this.parts[this.mainPart]].concat(this.novaStrukturaPoZmeneSynov(IDZmeny)));
+	    	result = result.concat(this.currentTree);
+	    	return result;
+	}
+	//Pri klicku treba nastavit danemu prvku vlastnost collaped=false/true ak ma synov (prvok.sons.length>0)
+	//NOVINKA!! data prvku sa daju ziskat z this.currentTree podla id v treante
   
-
-    var davkovac = null;
+  	var davkovac = null;
 
 	var $ = null;
 
@@ -533,10 +525,14 @@ Davkovac.prototype.createChangedTree = function (IDZmeny) {
 		 * @returns {Tree}
 		 */
 		createTree: function( jsonConfig ) {
-			var nNewTreeId = this.store.length;
-			this.store.push( new Tree( jsonConfig, nNewTreeId ) );
+			var nNewTreeId = 0;
+			this.store[0] =  new Tree( jsonConfig, nNewTreeId );
 			return this.get( nNewTreeId );
 		},
+
+		remove: function () {
+			this.store[0] = null;
+        	},
 
 		/**
 		 * @param {number} treeId
@@ -1804,15 +1800,13 @@ Davkovac.prototype.createChangedTree = function (IDZmeny) {
                         			if (self.getTreeConfig().callback.onBeforeClickCollapseSwitch.apply(self, [nodeSwitch, e]) === false) {
                             				return false;
                        				}
-											if ( davkovac.currentTree[self.id].sons.length > 0 ) {
-												if ( davkovac.currentTree[self.id].collapsed ) {
-													davkovac.currentTree[self.id].collapsed = false;
-												} else {
-													davkovac.currentTree[self.id].collapsed = true;												
-												}
-											}                  				
-                       				
-                       				
+						if ( davkovac.currentTree[self.id].sons.length > 0 ) {
+							if ( davkovac.currentTree[self.id].collapsed ) {
+								davkovac.currentTree[self.id].collapsed = false;
+							} else {
+								davkovac.currentTree[self.id].collapsed = true;												
+							}
+						}                  				
                         			self.toggleCollapse();
                         			self.getTreeConfig().callback.onAfterClickCollapseSwitch.apply(self, [nodeSwitch, e]);
                     			}	
@@ -1821,34 +1815,32 @@ Davkovac.prototype.createChangedTree = function (IDZmeny) {
         	},
 
 		addRightClickEvents: function ( nodeEl ) {
-			//TODO: pri update noveho Davkovaca prerobit na vykresovanie podla ID.
-			//TODO: nastavit Davkovac.clicked
 			var self = this;
 			UTIL.addEvent(nodeEl, 'contextmenu',
 				function (e) {
 					e.preventDefault();
-                    	if (e.which == 3) {
-                   			if ( self.infoBox != null ) {
-			               		self.infoBox.parentElement.removeChild(self.infoBox);
-							}
-							var id, newInitTree;
-							id = davkovac.currentTree[self.id].id;
-                            davkovac.nextSons(id);
-							newInitTree = JdSONconfig.make(davkovac.createChangedTree(id));
-                            treant.destroy();
-                            treant.tree = TreeStore.createTree(newInitTree);
-                   			treant.tree.positionTree(function () {});
-                   			treant.tree.reload();
-                   	}
-        		}
+                    				if (e.which == 3) {
+                        				if (self.infoBox != undefined) {
+                                				self.infoBox.parentElement.removeChild(self.infoBox);
+                            				}
+		                	            	var id, newInitTree;
+        			                    	id = davkovac.currentTree[self.id].id;
+                        			    	davkovac.nextSons(id);
+		                            		TreeStore.remove();
+                		            		newInitTree = JSONconfig.make(davkovac.createChangedTree(id));
+	                    				treant.destroy();
+							treant.tree = TreeStore.createTree(newInitTree);
+							treant.tree.reload();
+						}
+        			}
 			);
-       	},
+       		},
 
 		addHoverEvents: function( nodeEl ) {
 			var self = this;
 			UTIL.addEvent( nodeEl, 'mouseenter',
 				function( e ) {
-									                    			
+		               			
                     			if (davkovac.currentTree[self.id].id != davkovac.mainPart) {
                         			self.infoBox = self.createInfoBox(e, davkovac.currentTree[self.id]);
                     			}
@@ -2306,10 +2298,10 @@ Davkovac.prototype.createChangedTree = function (IDZmeny) {
 	// #############################################
 
 	var JSONconfig = {
-		make: function( configArray ) {
-
-			var i = configArray.length, node;
-
+		it : 0,
+        	make: function( configArray ) {
+			this.resetIt();
+				var i = configArray.length, node;
 			this.jsonStructure = {
 				chart: null,
 				nodeStructure: null
@@ -2317,44 +2309,39 @@ Davkovac.prototype.createChangedTree = function (IDZmeny) {
 			//fist loop: find config, find root;
 			while(i--) {
 				node = configArray[i];
-				if (node.hasOwnProperty('container')) {
+        		        if (node.hasOwnProperty('container')) {
 					this.jsonStructure.chart = node;
-					continue;
+                       			continue;
 				}
-
 				if (!node.hasOwnProperty('parent') && ! node.hasOwnProperty('container')) {
-					this.jsonStructure.nodeStructure = node;
-					node.myID = this.getID();
+		            		this.jsonStructure.nodeStructure = node;
+                                
 				}
 			}
-
-			this.findChildren(configArray);
-
+            	       	this.jsonStructure.nodeStructure.myID = this.getID();
+	        	this.findChildren(configArray);
 			return this.jsonStructure;
 		},
 
 		findChildren: function(nodes) {
 			var parents = [0]; // start with a a root node
-
+			console.log("HERE");
+			console.log(nodes.length);
 			while(parents.length) {
 				var parentId = parents.pop(),
-					parent = this.findNode(this.jsonStructure.nodeStructure, parentId),
-					i = 0, len = nodes.length,
-					children = [];
-
+				parent = this.findNode(this.jsonStructure.nodeStructure, parentId),
+				i = 0, len = nodes.length,
+				children = [];
+	
 				for(;i<len;i++) {
 					var node = nodes[i];
-					if(node.parent && (node.parent.myID == parentId)) { // skip config and root nodes
-
-						node.myID = this.getID();
-
+					if(node.otec && (node.otec.myID == parentId)) { // skip config and root nodes
+        		                        node.myID = this.getID();
 						delete node.parent;
-
 						children.push(node);
 						parents.push(node.myID);
 					}
 				}
-
 				if (children.length) {
 					parent.children = children;
 				}
@@ -2363,7 +2350,6 @@ Davkovac.prototype.createChangedTree = function (IDZmeny) {
 
 		findNode: function( node, nodeId ) {
 			var childrenLen, found;
-
 			if (node.myID === nodeId) {
 				return node;
 			}
@@ -2379,24 +2365,26 @@ Davkovac.prototype.createChangedTree = function (IDZmeny) {
 		},
 
 		getID: (function() {
-			var i = 0;
 			return function() {
-				return i++;
+				return this.it++;
 			};
-		})()
+		})(),
+
+		resetIt : function () {
+			this.it = 0;
+		}
 	};
 
 	/**
 	 * Chart constructor.
 	 */
 	var Treant = function(config, callback, jQuery) {
-        
-        davkovac = new Davkovac(config[0][0]);
-        config.shift();
-        config.forEach(function(item) {
-            davkovac.addSon(item[0], item[1], item[2], item[3], item[4], item[5], item[6]);
-        });
-        var jsonConfig = JSONconfig.make( davkovac.createFirstTree() );
+	        davkovac = new Davkovac(config[0][0]);
+        	config.shift();
+        	config.forEach(function(item) {
+            		davkovac.addSon(item[0], item[1], item[2], item[3], item[4], item[5], item[6]);
+        	});
+        	var jsonConfig = JSONconfig.make( davkovac.createFirstTree() );
 		if ( jQuery ) {
 			$ = jQuery;
 		}
@@ -2405,9 +2393,8 @@ Davkovac.prototype.createChangedTree = function (IDZmeny) {
 	};
 	Treant.prototype.destroy = function() {
 		TreeStore.destroy( this.tree.id );
-       // davkovac = null;
-	};
+		this.tree = null;
+       	};
 	/* expose constructor globally */
 	window.Treant = Treant;
-
 })();
