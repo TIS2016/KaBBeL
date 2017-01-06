@@ -18,7 +18,8 @@
     <script src="vendor/jquery.easing.js"></script>
 
     <script>
-                function vygenerujStrom(pocet) {
+		// vygeneruje strukturovany strom ktory ma priblizne pocet synov ako premenna pocet.
+		function vygenerujStrom(pocet) {
             return vygenerujRozlozenie(pocet);
 
             function spracujRozlozenie(pole) {
@@ -265,7 +266,8 @@
                 return spracujRozlozenie(rozneStromy);
             }
         }
-
+		
+		// vygeneruje jednoduchy strom ktory ma presne pocet synov ako premenna pocet.
         function simpleGeneracia(pocet) {
             function pridajSynoviDodatocneInfo(otcovDatumPridania) {
                 var datumUzavretia = generujDatum(otcovDatumPridania);
@@ -366,7 +368,9 @@
 
             return poleSynov;
         }
-        function generatedToArray(poleTried) {
+        
+		// skonvertuje vystup funkcii vygenerujStrom a simpleGeneracia na config pole pre treant.js
+		function generatedToArray(poleTried) {
             var result = [[poleTried[0].id]];
             var spracovane = [];
             for (var i = 1; i < poleTried.length; i++) {
@@ -385,33 +389,6 @@
         var simpleStruktura = simpleGeneracia(40000);
         console.log("DONE");*/
 			//myID, fatherID, meno,zarobok, datumUz, prog, datumKon
-
-		
-        var config = [
-            [0],
-            [ 1, 0, "nom1", 5, "HOVNo", "1.1.1020", "2.20.1203"],
-            [ 2, 0, "nom2", 5, "aaa", null, null],
-            [ 3,  0, "XXXX1", 5, "sadsd", null, null],
-            [ 4,  0, "XXXX2", 5, null, null, null],
-            [ 5, 0, "nom3", 5,"sadasd", null, null],
-            [6, 0, "nom4", 5, null, null, null],
-            [7, 0, "nom5", 5, null, null, null],
-            [8, 0, "nom6", 5, null, null, null],
-            [9, 0, "nom7", 5, null, null, null],
-            [10, 0, "nom8", 5, null, null, null],
-            [11, 0, "nom9", 5, null, null, null],
-            [12, 0, "nom10",5, null, null, null],
-            [13, 0, "nom11",5, null, null, null],
-            [14, 0, "nom12",5, null, null, null],
-            [15, 0, "nom13",5, null, null, null],
-            [16,  5, "XXX1", 5, null, null, null],
-            [17,  5, "XXX2", 5, "HOVNo", "1.1.1020", "2.20.1203"],
-            [18,  5, "XXX3", 5, null, null, null],
-            [19,  5, "XXX3", 5, null, null, null],
-            [20,  5, "XXXs3", 5, null, null, null],
-            [21,  5, "XXXs3", 5, null, null, null],
-
-        ]
 		        var config = [
 			[10],
 			[1, 10,"a1", 12, null, null, null],
