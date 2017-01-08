@@ -1858,6 +1858,7 @@
                     				if (e.which == 3) {
                         				if (self.infoBox != undefined) {
                                 				self.infoBox.parentElement.removeChild(self.infoBox);
+												self.infoBox=undefined;
                             				}
                             				if (davkovac.currentTree[self.id].sons.length > 0 && davkovac.currentTree[self.id].sons.length > davkovac.displayNumber) {
                                                 		var id, newInitTree;
@@ -1874,7 +1875,9 @@
 			var self = this;
 			UTIL.addEvent( nodeEl, 'mouseenter',
 				function( e ) {
-					//console.log(self.id);
+					console.log(self.id);
+					console.log(davkovac);
+					
                     			if (davkovac.currentTree[self.id].id != davkovac.mainPart) {
                         			self.infoBox = self.createInfoBox(e, davkovac.currentTree[self.id]);
                     			}
