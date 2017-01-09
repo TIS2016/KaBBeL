@@ -37,7 +37,7 @@
     		this.actual = false; // je strom aktualizovaný
     		this.parts = []; // uložené všetky prvky stromu v asociatívnom poli podla ID
     		this.currentTree = []; // aktualne zobrazovany strom
-    		this.maxShow=1000; // hranica načítaných prvkov stromu pri prvom volani (po urovniach, vzdy dokonci uroven...) optimalizcna premenna 
+    		this.maxShow=1000; // hranica načítaných prvkov stromu pri prvom volani (po urovniach, vzdy dokonci uroven...) optimalizcna premenna
     		this.config = {
 			container: "#collapsable-example",
 			animateOnInit: false,
@@ -181,12 +181,14 @@
 	    	var index = 0;
 	    	var i = 1;
     		var vybranyOtec;
+			result[0].children=undefined;
 	    	while (result.length != vyberaciePole.length) {
 			vybranyOtec = result[index];
 			i = 1;
 			vyberaciePole.forEach(function (prvok) {
 		    		if(prvok!=result[0]){
 					if (prvok.parentID == vybranyOtec.id) {
+							prvok.children=undefined;
 			    			result.splice(index+i,0,prvok);
 			    			i++;
 					}
@@ -1860,12 +1862,13 @@
                                 				self.infoBox.parentElement.removeChild(self.infoBox);
 												self.infoBox=undefined;
                             				}
-                            				if (davkovac.currentTree[self.id].sons.length > 0 && davkovac.currentTree[self.id].sons.length > davkovac.displayNumber) {
-                                                		var id, newInitTree;
-                                                		id = davkovac.currentTree[self.id].id;
-                                                		davkovac.nextSons(id);
-                                                		treant.updateWithNewData(davkovac.createChangedTree(id));
-                                            		}
+										if (davkovac.currentTree[self.id].sons.length > 0 && davkovac.currentTree[self.id].sons.length > davkovac.displayNumber) {
+													var id, newInitTree;
+													id = davkovac.currentTree[self.id].id;
+													davkovac.nextSons(id);
+													treant.tree.nodeDB=undefined;
+													treant.updateWithNewData(davkovac.createChangedTree(id));
+											}
                         			}
         			}
 			);
@@ -1874,10 +1877,7 @@
 		addHoverEvents: function( nodeEl ) {
 			var self = this;
 			UTIL.addEvent( nodeEl, 'mouseenter',
-				function( e ) {
-					console.log(self.id);
-					console.log(davkovac);
-					
+				function( e ) {					
                     			if (davkovac.currentTree[self.id].id != davkovac.mainPart) {
                         			self.infoBox = self.createInfoBox(e, davkovac.currentTree[self.id]);
                     			}
