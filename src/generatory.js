@@ -29,7 +29,7 @@
                     result.push(flatten(strom));
                 })
                 //return result;
-                return [0].concat(zotatStromyZachranitBobry(result));
+                return [new vytvorSyna(0)].concat(pospajajStruktury(result));
             }
             function flatten(strom) {
                 var result = [strom, []];
@@ -49,7 +49,7 @@
                 }
                 return result;
             }
-            function zotatStromyZachranitBobry(poleStromov) {
+            function pospajajStruktury(poleStromov) {
                 var hlavnyStrom = poleStromov.pop();
                 var hlavnyOtec = new vytvorSyna(0);
                 hlavnyOtec.datumUzavretia = "8.12.2016";
