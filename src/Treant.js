@@ -17,28 +17,28 @@
  
  /*      NASA DOKUMENTACIA OKREM DAVKOVACA.... OBSAH
  vsetky eventy su pridavane kazdemu prvku stromu zvlast.
- 1853 - right click event
- 1873 - hover event
- 1915 - sem mozes pridat dalsie info do hover-u
- 2412 - dokumentacia konstruktora treant.js
+ 1860 - right click event
+ 1882 - hover event
+ 1923 - sem mozes pridat dalsie info do hover-u
+ 2421 - dokumentacia konstruktora treant.js
  */
  
 ;(function(){
-		/*
-		Konstruktor davkovaca
-		
-		var id = id hlavneho otca stromu
-		return null
+		/**
+		 * Konstruktor davkovaca.
+		 *
+		 * @param {Number} id - id hlavneho otca stromu.
+		 * @returns {null}
 		*/
-    	var Davkovac = function(id) {
-    		this.mainPart = id; // id hlavneho otca zo vstupu
-			this.clicked = id; // aktualny kliknuty prvok v strome
-    		this.displayNumber = 5; // maximalny pocet zobrazených synov jedného otca v jednej úrovni
-    		this.actual = false; // je strom aktualizovaný
-    		this.parts = []; // uložené všetky prvky stromu v asociatívnom poli podla ID
-    		this.currentTree = []; // aktualne zobrazovany strom
-    		this.maxShow=1000; // hranica načítaných prvkov stromu pri prvom volani (po urovniach, vzdy dokonci uroven...) optimalizcna premenna
-    		this.config = {
+    var Davkovac = function(id) {
+        this.mainPart = id; // id hlavneho otca zo vstupu
+        this.clicked = id; // aktualny kliknuty prvok v strome
+        this.displayNumber = 5; // maximalny pocet zobrazených synov jedného otca v jednej úrovni
+        this.actual = false; // je strom aktualizovaný
+        this.parts = []; // uložené všetky prvky stromu v asociatívnom poli podla ID
+        this.currentTree = []; // aktualne zobrazovany strom
+        this.maxShow=1000; // hranica načítaných prvkov stromu pri prvom volani (po urovniach, vzdy dokonci uroven...) optimalizcna premenna
+        this.config = {
 			container: "#collapsable-example",
 			animateOnInit: false,
 			node: {
@@ -54,19 +54,18 @@
    		this.addSon(id, id,"Ja", 0,null,null,null); //pridanie otca a jeho dat do struktury
 	}
 
-	//Prida syna do Davkovaca a struktury, stane sa neaktualnou.
-	/*
-	myID = id syna
-	fatherID = otcova id
-	meno = meno syna
-	zarobok = vami urceny zarobok z databazy
-	datumUz = datum uzavretia zmluvy
-	prog = program syna
-	datumKon = datum vyprsania zmluvy
-	
-	return null
-	
-	*/
+	/**
+     * Prida syna do Davkovaca a struktury, stane sa neaktualnou.
+	 *
+	 * @param {Number} myID - id syna.
+	 * @param {Number} fatherID - Otcova id.
+	 * @param {string} meno - Meno syna.
+	 * @param {Number} zarobok - Vami urceny zarobok z databazy.
+	 * @param {string} datumUz - Datum uzavretia zmluvy.
+	 * @param {string} prog - Program syna.
+	 * @param {string} datumKon - Datum vyprsania zmluvy.
+     * @returns {null}
+	 */
 	Davkovac.prototype.addSon = function (myID, fatherID, meno,zarobok, datumUz, prog, datumKon) {
 		if (myID != this.mainPart) {
 			part = {// tu viete pridat lubovolne premenne syna viz. dalsi riadok
@@ -99,7 +98,8 @@
 	    }
 	    this.parts[myID] = part;
 	}
-	// Vola sa autmaticky pri vytvoreni stromu, aktualizuje vztahy medzi synmi.
+    
+	/** Vola sa automaticky pri vytvoreni stromu, aktualizuje vztahy medzi synmi. */
 	Davkovac.prototype.update = function () {
  		if (this.actual) {
 			return;
@@ -115,11 +115,16 @@
 			}
     	})
 	}
-	//vrati syna s danou ID
+	/** Vrati syna s danou ID */
 	Davkovac.prototype.getSon = function (id) {
 		return this.parts[id];
 	}
-	//Prepne otcovi s ID (ID z davkovaca) "fatherID" vramci Davkovaca na dalsich(definovane v konstruktore Davkovaca v premennej displayNumber) synov. iba vramci davkovaca, neupdatne automaticky strom, novy strom sa da vypytat pomocou createChangedTree
+	/** 
+     * Prepne otcovi s ID (ID z davkovaca) "fatherID" vramci Davkovaca na dalsich 
+     * (definovane v konstruktore Davkovaca v premennej displayNumber) synov. 
+     * Iba vramci davkovaca, neupdatne automaticky strom, novy strom sa da vypytat 
+     * pomocou createChangedTree 
+     */
 	Davkovac.prototype.nextSons = function (fatherID) {
 		var father = this.getSon(fatherID);
 		if (father.sons.length - (father.showing + 1) * this.displayNumber > 0) {
@@ -140,7 +145,7 @@
 			nextParent = nextParent.parent;
 	    	}
 	}
-	// nepouziva sa, lebo tuto funkciu si vola createFirstTree, vytiahne synov od hlavneho otca po limit maxShow
+	// Nepouziva sa, lebo tuto funkciu si vola createFirstTree, vytiahne synov od hlavneho otca po limit maxShow
 	Davkovac.prototype.novaStrukturasMaximom = function () {
 	    	var result = [];
 	    	var prechadzam = [this.parts[this.mainPart]];
@@ -166,7 +171,7 @@
 	    	})
 	    	return result;
 	}
-	//Vrati true ak su zobrazeni synovia osoby s danym ID hladaneID
+	/** Vrati true ak su zobrazeni synovia osoby s danym ID hladaneID */
 	Davkovac.prototype.zobrazeniSynovia = function (hladaneID) {
 	    	for (var i = 1; i < this.currentTree.length;i++){
 			if (hladaneID==this.currentTree[i].parentID) {
@@ -175,7 +180,7 @@
 	    	}
 	    	return false;
 	}
-	//Zoradi synov v premennej vyberaciePole podla struktury depth first
+	/** Zoradi synov v premennej vyberaciePole podla struktury depth first */
 	Davkovac.prototype.toDepthFirst = function (vyberaciePole) {
 	    	var result = [vyberaciePole[0]];
 	    	var index = 0;
@@ -198,7 +203,7 @@
 	    	}
 	    	return result;
 	}
-	//Vola sa pri kontrukcii v treant.js . Je to strom do takej hlbky, ktora je tesne nad maxShow prvkov.
+	/** Vola sa pri kontrukcii v treant.js . Je to strom do takej hlbky, ktora je tesne nad maxShow prvkov. */
 	Davkovac.prototype.createFirstTree = function () {
 		this.update();
 	        var result = [];
@@ -207,7 +212,7 @@
 	        result = result.concat(this.currentTree);
 	        return result;
 	}
-    //Pri leftclicku na syna ktory nema nacitanych synov, vracia novy strom aj s jeho synami
+    /** Pri leftclicku na syna ktory nema nacitanych synov, vracia novy strom aj s jeho synami */
     Davkovac.prototype.extendTree = function (id) {
             	var result=this.currentTree
             	var part = this.getSon(id);
@@ -220,7 +225,7 @@
             	this.currentTree = this.toDepthFirst(result);
         	return [this.config].concat(this.currentTree);
         }
-    //nepouziva sa, lebo tuto funkciu si vola createChangedTree, vytiahne od hlavneho otca vsetkych synov ktori boli uz pred tym zobrazeny
+    /** Nepouziva sa, lebo tuto funkciu si vola createChangedTree, vytiahne od hlavneho otca vsetkych synov ktori boli uz pred tym zobrazeny */
     Davkovac.prototype.novaStrukturaPoZmeneSynov= function (IDZmeny) {
             	var result = [];
             	var prechadzam = [this.parts[this.mainPart]];
@@ -243,7 +248,7 @@
     		}	
     		return result;
 	}
-	//Vola sa ked sa prepnu synovia otca s IDZmeny... ID musi byt ID v Davkovaci!
+	/** Vola sa ked sa prepnu synovia otca s IDZmeny... ID musi byt ID v Davkovaci! */
 	Davkovac.prototype.createChangedTree = function (IDZmeny) {
     		this.update();
 	    	var result = [];
@@ -2413,8 +2418,11 @@
 	};
 
 	/**
-	 Callback: funkcia ktora sa vykona po nacitani
-	 var config = dvojrozmerne pole, kazde pole v poli su data jedneho pouzivatela na indexe 0 musi byt hlavny otec, data su zoradene podla vstupu funkcie davkovaca addSon
+     * Hlavny konstruktor programu.
+     *
+	 * @param {Array} config - Dvojrozmerne konfiguracne pole, kazde pole v poli su data jedneho pouzivatela. Na indexe 0 musi byt hlavny otec, data su zoradene podla vstupu funkcie davkovaca addSon.
+     * @param {Function} callback - Funkcia, ktora sa vykona po nacitani.
+     * @returns {null}
 	 */
 	var Treant = function(config, callback, jQuery) {
 	        davkovac = new Davkovac(config[0][0]);

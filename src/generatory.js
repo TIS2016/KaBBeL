@@ -1,5 +1,9 @@
-// vygeneruje strukturovany strom ktory ma priblizne pocet synov ako premenna pocet.
-		function vygenerujStrom(pocet) {
+        /**
+         * Vygeneruje strukturovany strom ktory ma priblizne pocet synov ako premenna pocet.
+         *
+         * @param {Number} pocet - Priblizny pocet synov vo vygenerovanom strome.
+		 */
+        function vygenerujStrom(pocet) {
             return vygenerujRozlozenie(pocet);
             function spracujRozlozenie(pole) {
                 function spracujStrom(stromy) {
@@ -229,7 +233,11 @@
             }
         }
 		
-		// vygeneruje jednoduchy strom ktory ma presne pocet synov ako premenna pocet.
+		/**
+         * Vygeneruje jednoduchy strom ktory ma presne pocet synov ako premenna pocet.
+         *
+         * @param {Number} pocet - Zelany pocet synov v strome.
+         */
         function simpleGeneracia(pocet) {
             function pridajSynoviDodatocneInfo(otcovDatumPridania) {
                 var datumUzavretia = generujDatum(otcovDatumPridania);
@@ -325,7 +333,12 @@
             return poleSynov;
         }
         
-		// skonvertuje vystup funkcii vygenerujStrom a simpleGeneracia na config pole pre treant.js
+		/**
+         * Skonvertuje vystup funkcii vygenerujStrom a simpleGeneracia na config pole pre Treant.js.
+         *
+         * @param poleTried - Vystup z funkcie vygenerujStrom alebo simpleGeneracia.
+         * @returns {Array} Konfiguracne pole pre Treant.js.
+         */
 		function generatedToArray(poleTried) {
             var result = [[poleTried[0].id]];
             var spracovane = [];
