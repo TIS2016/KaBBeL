@@ -1,9 +1,0 @@
-Zapisnica z oboch stretnuti
-Pritomni: vsetci okrem Kellnera
-
-Vykonane:
-  - hotovy davkovac.html
-
-Dohodnute:
-  - format vstupu dat z databazy
-  - rozdelene ulohy, buduci tyzden hotova cela implementacia
